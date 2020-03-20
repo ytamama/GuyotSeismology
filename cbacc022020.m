@@ -5,7 +5,7 @@
 %magnitude of acceleration
 %Campus Blasts: 2-18-2020 and 2-21-2020
 
-%last edited March 19, 2020 by Yuri Tamama
+%last edited March 20, 2020 by Yuri Tamama
 
 
 %set file names (from mcms2mat.m) and time step
@@ -83,7 +83,7 @@ for i = 1:slen
     end
 end
 
-%convert velocities from nm/s to m/s
+%convert accelerations from nm/s to m/s
 accx = accx*(1e-9);
 accy = accy*(1e-9);
 accz = accz*(1e-9);
@@ -100,7 +100,7 @@ ylabel("Y Acceleration (m/s)")
 subplot(3,1,3)
 plot(trange, accz);
 ylabel("Z Acceleration (m/s)")
-xlabel("Time (s) since 16:00:00 GMT")
+xlabel(sprintf("Time (s) since %s:00:00 GMT",HH))
 % print('-bestfit','-dpdf','CampusBlastAccel_'+savedate);
 % print('-dpng','CampusBlastAccel_'+savedate);
 
