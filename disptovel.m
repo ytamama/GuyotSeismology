@@ -63,14 +63,14 @@ end
 figure(1)
 subplot(3,1,1)
 plot(trange, velx);
-ylabel("X Velocity (mm/s)")
+ylabel("X Velocity (nm/s)")
 title({"Velocity of Seismic Waves";"Recorded at Guyot Hall at Princeton University";datestr})
 subplot(3,1,2)
 plot(trange, vely);
-ylabel("Y Velocity (mm/s)")
+ylabel("Y Velocity (nm/s)")
 subplot(3,1,3)
 plot(trange, velz);
-ylabel("Z Velocity (mm/s)")
+ylabel("Z Velocity (nm/s)")
 xlabel(sprintf("Time (s) since %s:00:00 GMT",HH))
 print('-bestfit','-dpdf','SeismicVelocity_'+savedate);
 print('-dpng','SeismicVelocity_'+savedate);
