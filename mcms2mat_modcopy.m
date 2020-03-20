@@ -49,8 +49,8 @@ function mcms2mat_modcopy(yyyy,mm,dd,HH,MM,SS,qp,pdf,of,xls,yls)
 % Last modified by abrummen-at-princeton.edu, 07/14/2016
 % Last modified by fjsimons-at-alum.mit.edu, 02/22/2020
 
+% Reference: mcms2mat.m, created by Professor Frederik Simons
 % mcms2mat.m modified to mcms2mat_mod.m by Yuri Tamama, 03/20/2020
-% adjusted to her cressida machine and directories
 
 
 % FIXED STUFF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
