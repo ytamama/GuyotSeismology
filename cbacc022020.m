@@ -92,14 +92,14 @@ accz = accz*(1e-9);
 figure(1)
 subplot(3,1,1)
 plot(trange, accx);
-ylabel("X Acceleration (m/s)")
+ylabel("X Acceleration (m/s^2)")
 title({"Acceleration of Campus Blasts";"Recorded at Guyot Hall at Princeton University";datestr})
 subplot(3,1,2)
 plot(trange, accy);
-ylabel("Y Acceleration (m/s)")
+ylabel("Y Acceleration (m/s^2)")
 subplot(3,1,3)
 plot(trange, accz);
-ylabel("Z Acceleration (m/s)")
+ylabel("Z Acceleration (m/s^2)")
 xlabel(sprintf("Time (s) since %s:00:00 GMT",HH))
 % print('-bestfit','-dpdf','CampusBlastAccel_'+savedate);
 % print('-dpng','CampusBlastAccel_'+savedate);
