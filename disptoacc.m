@@ -12,7 +12,7 @@
 %seconds - range of seconds within the hour (1-3600) that we want to consider 
 %(e.g. [1800 1900])
 
-%lasted edited: March 20, 2020 by Yuri Tamama
+%lasted edited: March 21, 2020 by Yuri Tamama
 
 function disptoacc(matfile,yyyy,mm,dd,HH,seconds) 
 
@@ -74,7 +74,7 @@ ylabel("Z Acceleration (nm/s^2)")
 xlabel(sprintf("Time (s) since %s:00:00 GMT",HH))
 print('-bestfit','-dpdf','SeismicAccel_'+savedate);
 print('-dpng','SeismicAccel_'+savedate);
-
+print('-depsc','SeismicAccel'+savedate);
 
 
 end

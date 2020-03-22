@@ -5,7 +5,7 @@
 %magnitude of velocity
 %Campus Blasts: 2-18-2020 and 2-21-2020
 
-%last edited March 19, 2020 by Yuri Tamama
+%last edited March 21, 2020 by Yuri Tamama
 
 
 %set file names (from mcms2mat.m) and time step
@@ -103,6 +103,7 @@ ylabel("Z Velocity (mm/s)")
 xlabel("Time (s) since 16:00:00 GMT")
 print('-bestfit','-dpdf','CampusBlastVelocity_'+savedate);
 print('-dpng','CampusBlastVelocity_'+savedate);
+print('-depsc','CampusBlastVelocity_'+savedate);
 
 %compute maximum absolute value of velocity, in mm/s
 maxvelx = max(abs(velx));
