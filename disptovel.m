@@ -4,7 +4,7 @@
 %Plots the velocity as a time series within the time specified
 
 %inputs
-%filename - .mat file containing relevant data
+%matfile - .mat file containing relevant data
 %yyyy - year
 %mm - month
 %dd - day
@@ -12,16 +12,22 @@
 %seconds - range of seconds within the hour (1-3600) that we want to consider 
 %(e.g. [1800 1900])
 
-%lasted edited: March 21, 2020 by Yuri Tamama
+%lasted edited: March 25, 2020 by Yuri Tamama
 
 function disptovel(matfile,yyyy,mm,dd,HH,seconds) 
+
+%set a default directory to save graphs
+%names hidden here for privacy
+setenv('',getenv(''))
+savedir=getenv('');
+savedir=fullfile(savedir,datestr(datenum(yyyy,mm,dd),'yyyy/mm/dd'));
+savedir=fullfile(savedir,sprintf("SeismicVel_%d%d%d_%d%d%d",mm,dd,yyyy,HH,floor(seconds(1)),floor(seconds(2))));
 
 %set time step and time vector
 deltat = 0.01;
 trange = [seconds(1):deltat:seconds(2)];
 tlen = length(trange);
-datestr = sprintf("%d/%d/%d %d GMT",mm,dd,yyyy,HH);
-savedate = sprintf("%d%d%d_%d%d%d",mm,dd,yyyy,HH,seconds(1),seconds(2));
+datestring = sprintf("%d/%d/%d %d GMT",mm,dd,yyyy,HH);
 
 %load .mat file
 load(matfile);
@@ -58,23 +64,34 @@ for i = 1:slen
     end
 end
 
+%find maximum magnitude of velocity to set x, y, z, limits
+vx_max = max(abs(velx));
+vx_lim = 1.1*vx_max;
+vy_max = max(abs(vely));
+vy_lim = 1.1*vy_max;
+vz_max = max(abs(velz));
+vz_lim = 1.1*vz_max;
 
-%plot velocity and save
-figure(1)
+%plot a time series of velocity vs time
+figure()
 subplot(3,1,1)
 plot(trange, velx);
-ylabel("X Velocity (nm/s)")
-title({"Velocity of Seismic Waves";"Recorded at Guyot Hall at Princeton University";datestr})
+ylim([-vx_lim vx_lim])
+ylabel("X (nm/s)")
+title({"Velocity of Seismic Waves";"Recorded at Guyot Hall at Princeton University";datestring})
 subplot(3,1,2)
 plot(trange, vely);
-ylabel("Y Velocity (nm/s)")
+ylim([-vy_lim vy_lim])
+ylabel("Y (nm/s)")
 subplot(3,1,3)
 plot(trange, velz);
-ylabel("Z Velocity (nm/s)")
-xlabel(sprintf("Time (s) since %s:00:00 GMT",HH))
-print('-bestfit','-dpdf','SeismicVelocity_'+savedate);
-print('-dpng','SeismicVelocity_'+savedate);
-print('-depsc','SeismicVelocity'+savedate);
+ylim([-vz_lim vz_lim])
+ylabel("Z (nm/s)")
+xlabel(sprintf("Time (s) since %d:00:00 GMT",HH))
+
+%save the final product
+print('-bestfit','-dpdf',savedir);
+print('-depsc',savedir);
 
 
 end
