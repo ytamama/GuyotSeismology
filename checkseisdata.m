@@ -1,6 +1,10 @@
 %checkseisdata.m
 %Program to comb through ground displacement data collected by the 
+<<<<<<< HEAD
 %seismometer at Guyot Hall for (a) given
+=======
+%MeridianCompact-PH1-0248 S0001 seismometer at Guyot Hall for (a) given
+>>>>>>> c3e0c562d53323a25c584c5539b832da250767a4
 %month(s) and check which hours and components are missing
 
 %Inputs:
@@ -118,7 +122,11 @@ missing_date = datetime(missing_date,'InputFormat','yyyy-MM-dd HH:mm:ss');
 
 
 %By now we should have two arrays of the same length, whose contents tell
+<<<<<<< HEAD
 %which data files are 'missing', in other words, which times did
+=======
+%which .miniseed data files are 'missing', in other words, which times did
+>>>>>>> c3e0c562d53323a25c584c5539b832da250767a4
 %the seismometer not collect data
 
 %Let's save this information for future use
