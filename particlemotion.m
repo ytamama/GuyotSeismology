@@ -1,26 +1,25 @@
-%particlemotion.m
-%Plots a particle motion diagram (changing with time) in the x, y, and z directions
-%of the seismometer in Guyot Hall at Princeton University
-
-%inputs
+function particlemotion(matfile,yyyy,mm,dd,HH,seconds) 
+%
+%Plots a particle motion diagram (changing with time) in the 
+%x, y, and z directions of the seismometer in Guyot Hall at 
+%Princeton University
+%
+%INPUTS
 %matfile - .mat file containing relevant data
 %yyyy - year
 %mm - month
 %dd - day
 %HH - hour
-%seconds - range of seconds within the hour (1-3600) that we want to consider 
+%seconds - range of seconds within the hour (1-3600) that we consider 
 %(e.g. [1800 1900])
+%
+%last edited April 14, 2020 by Yuri Tamama
 
-%last edited March 25, 2020 by Yuri Tamama
-
-function particlemotion(matfile,yyyy,mm,dd,HH,seconds) 
 
 %set a default directory to save graphs
-%names hidden here for privacy
-setenv('',getenv(''))
-savedir=getenv('');
-savedir=fullfile(savedir,datestr(datenum(yyyy,mm,dd),'/yyyy/mm/dd'));
-savedir=fullfile(savedir,sprintf("ParticleMotion_%d%d%d_%d%d%d",mm,dd,yyyy,HH,floor(seconds(1)),floor(seconds(2))));
+savedir=fullfile(getenv('MC'),datestr(datenum(yyyy,mm,dd),'/yyyy/mm/dd'));
+savedir=fullfile(savedir,sprintf("ParticleMotion_%d%d%d_%d%d%d",mm,...
+    dd,yyyy,HH,floor(seconds(1)),floor(seconds(2))));
 
 %set time step and time vector
 deltat = 0.01;
@@ -52,7 +51,8 @@ plot3(sx(1),sy(1),sz(1),'*-','MarkerEdgeColor', 'blue', 'Color','blue')
 xlim([-sx_lim sx_lim])
 ylim([-sy_lim sy_lim])
 zlim([-sz_lim sz_lim])
-title({"Particle Motion Diagram of Seismometer";"in Guyot Hall at Princeton University";datestring})
+title({"Particle Motion Diagram of Seismometer";...
+    "in Guyot Hall at Princeton University";datestring})
 xlabel("X (nm)")
 ylabel("Y (nm)")
 zlabel("Z (nm)")
@@ -60,14 +60,17 @@ legend(sprintf('%d',trange(1)))
 
 hold on
 pause on
-%plot a particle motion diagram that changes with time and tracks the seismometer's motion
+%plot a particle motion diagram that changes with time 
+%and tracks the seismometer's motion
 for i = 2:tlen
-    plot3(sx(1:i),sy(1:i),sz(1:i),'*-','MarkerEdgeColor', 'blue', 'Color','blue')
+    plot3(sx(1:i),sy(1:i),sz(1:i),'*-','MarkerEdgeColor', 'blue',...
+        'Color','blue')
     xlim([-sx_lim sx_lim])
     ylim([-sy_lim sy_lim])
     zlim([-sz_lim sz_lim])
     legend(sprintf('%d',trange(i)))
-    title({"Particle Motion Diagram of Seismometer";"in Guyot Hall at Princeton University";datestring})
+    title({"Particle Motion Diagram of Seismometer";...
+        "in Guyot Hall at Princeton University";datestring})
     xlabel("X (nm)")
     ylabel("Y (nm)")
     zlabel("Z (nm)")
@@ -82,7 +85,8 @@ xlim([-sx_lim sx_lim])
 ylim([-sy_lim sy_lim])
 zlim([-sz_lim sz_lim])
 legend(sprintf('%d',trange(tlen)))
-title({"Particle Motion Diagram of Seismometer";"in Guyot Hall at Princeton University";datestring})
+title({"Particle Motion Diagram of Seismometer";...
+    "in Guyot Hall at Princeton University";datestring})
 xlabel("X (nm)")
 ylabel("Y (nm)")
 zlabel("Z (nm)")
