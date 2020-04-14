@@ -1,22 +1,23 @@
-%checkseisdata.m
-%Program to comb through ground displacement data collected by the 
-%seismometer at Guyot Hall for (a) given
-%month(s) and check which hours and components are missing
-
-%Inputs:
-%YYYY: year - 2017, 2018, 2019, or 2020
-%MM: month(s) 
-
-%Outputs:
-%A table consisting of the time (YYYY/MM/DD HH:00:00 where HH = hour) 
-%and component (X, Y, Z) of the files that are missing 
-%(i.e. data have not been collected as miniseed files)
-%Export this table into a .csv file / spreadsheet for future use
-
+function nofiles=checkseisdata(YYYY,MM) 
+% nofiles=checkseisdata(YYYY,MM) 
+%
+% Program to comb through ground displacement data collected by the 
+% seismometer at Guyot Hall for (a) given
+% month(s) and check which hours and components are missing 
+%
+% INPUT:
+% 
+% YYYY: year - 2017, 2018, 2019, or 2020
+% MM: month(s) 
+%
+% OUTPUT:
+%
+% A table consisting of the time (YYYY/MM/DD HH:00:00 where HH = hour) 
+% and component (X, Y, Z) of the files that are missing 
+% (i.e. data have not been collected as miniseed files)
+% Export this table into a .csv file / spreadsheet for future use
+% 
 %Last modified: April 13, 2020 by Yuri Tamama
-
-function nofiles = checkseisdata(YYYY,MM) 
-
 
 %Set directory where we will search for our files
 setenv('MC0',getenv('MC0'));
@@ -139,9 +140,6 @@ setenv('HRS',getenv('HRS'))
 savefile = getenv('HRS');
 savefile=fullfile(savefile,missing_file);
 writetable(missing_table,savefile);
-
-
-end
 
 
 
