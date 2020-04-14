@@ -1,27 +1,24 @@
-%disptovel.m
+function disptovel(matfile,yyyy,mm,dd,HH,seconds) 
+%
 %Computes the velocity of the seismometer at Guyot Hall, Princeton
 %University from the displacement recorded
 %Plots the velocity as a time series within the time specified
-
-%inputs
+%
+%INPUTS:
 %matfile - .mat file containing relevant data
 %yyyy - year
 %mm - month
 %dd - day
 %HH - hour
-%seconds - range of seconds within the hour (1-3600) that we want to consider 
+%seconds - range of seconds within the hour (1-3600) that we consider 
 %(e.g. [1800 1900])
-
-%lasted edited: March 25, 2020 by Yuri Tamama
-
-function disptovel(matfile,yyyy,mm,dd,HH,seconds) 
+%
+%last edited: April 14, 2020 by Yuri Tamama
 
 %set a default directory to save graphs
-%names hidden here for privacy
-setenv('',getenv(''))
-savedir=getenv('');
-savedir=fullfile(savedir,datestr(datenum(yyyy,mm,dd),'yyyy/mm/dd'));
-savedir=fullfile(savedir,sprintf("SeismicVel_%d%d%d_%d%d%d",mm,dd,yyyy,HH,floor(seconds(1)),floor(seconds(2))));
+savedir=fullfile(getenv('MC'),datestr(datenum(yyyy,mm,dd),'yyyy/mm/dd'));
+savedir=fullfile(savedir,sprintf("SeismicVel_%d%d%d_%d%d%d",mm,dd,...
+    yyyy,HH,floor(seconds(1)),floor(seconds(2))));
 
 %set time step and time vector
 deltat = 0.01;
@@ -78,7 +75,8 @@ subplot(3,1,1)
 plot(trange, velx);
 ylim([-vx_lim vx_lim])
 ylabel("X (nm/s)")
-title({"Velocity of Seismic Waves";"Recorded at Guyot Hall at Princeton University";datestring})
+title({"Velocity of Seismic Waves";...
+    "Recorded at Guyot Hall at Princeton University";datestring})
 subplot(3,1,2)
 plot(trange, vely);
 ylim([-vy_lim vy_lim])
