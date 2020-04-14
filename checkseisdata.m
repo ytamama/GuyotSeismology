@@ -20,7 +20,6 @@ function nofiles=checkseisdata(YYYY,MM)
 %Last modified: April 13, 2020 by Yuri Tamama
 
 %Set directory where we will search for our files
-setenv('MC0',getenv('MC0'));
 dir = getenv('MC0');
 
 %Set Parameters 
@@ -32,7 +31,8 @@ numhrs = 24;
 
 %Set number of days
 isleap = isleapyear(YYYY,1);  %check if Leap Year (see Meeus repository)
-numdays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];  %# days in each month
+%# days in each month
+numdays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; 
 if nummonths > 1
     DD = zeros(nummonths,1);
     for m = 1:nummonths
@@ -51,7 +51,7 @@ end
 %Set how many total files we should have, if the seismometer successfully
 %collected data in all 3 vomponents during the given time period
 totaldays = sum(DD);
-totalfiles = totaldays*numhrs*numcomp;  %# of days * # hours * # components
+totalfiles = totaldays*numhrs*numcomp; %# of days * # hours * # components
 
 
 %Initialize arrays indicating which files are 'missing'
@@ -81,7 +81,8 @@ for m = 1:nummonths
         end
         
         %set full directory to look for files
-        searchdir = fullfile(dir,datestr(datenum(YYYY,month,day),'yyyy/mm/dd'));
+        searchdir = fullfile(dir,datestr(datenum(YYYY,month,day),...
+            'yyyy/mm/dd'));
         
         %iterate through hours
         for h = 1:numhrs
@@ -97,15 +98,21 @@ for m = 1:nummonths
                 
                 %structure name of the file and set full path to it
                 %check for both possible file names
-                filename=sprintf('PP.S0001.00.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',component,yearstr,monthstr,daystr,hourstr);
-                filename2=sprintf('S0001.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',component,yearstr,monthstr,daystr,hourstr);
+                filename=sprintf(...
+                    'PP.S0001.00.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',...
+                    component,yearstr,monthstr,daystr,hourstr);
+                filename2=sprintf(...
+                    'S0001.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',...
+                    component,yearstr,monthstr,daystr,hourstr);
                 filename=fullfile(searchdir,filename);
                 filename2=fullfile(searchdir,filename2);
                 
-                %if the file does NOT exist - add to the 'missing files=' arrays
+                %if the file does NOT exist 
+                %add to the 'missing files=' arrays
                 if (isfile(filename) == 0) && (isfile(filename2) == 0)
                     missing_comp{end+1} = component;
-                    date = sprintf('%s-%s-%s %s:00:00',yearstr,monthstr,daystr,hourstr);
+                    date = sprintf('%s-%s-%s %s:00:00',yearstr,...
+                        monthstr,daystr,hourstr);
                     missing_date{end+1} = date;
                 end
                 
@@ -130,15 +137,14 @@ missing_table = table(missing_comp, missing_date);
 missing_table.Properties.VariableNames = {'Component' 'Time'};
 nofiles = missing_table;  %set this table as the output variable
 if nummonths > 1
-    missing_file = sprintf('missingfiles_%s_%dto%d.csv',yearstr,MM(1),MM(nummonths));
+    missing_file = sprintf('missingfiles_%s_%dto%d.csv',...
+        yearstr,MM(1),MM(nummonths));
 else
     missing_file = sprintf('missingfiles_%s_%d.csv',yearstr,MM);
 end
 
 %Let's save this file
-setenv('HRS',getenv('HRS'))
-savefile = getenv('HRS');
-savefile=fullfile(savefile,missing_file);
+savefile=fullfile(getenv('HRS'),missing_file);
 writetable(missing_table,savefile);
 
 
