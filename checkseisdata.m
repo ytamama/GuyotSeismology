@@ -11,15 +11,11 @@ function checkseisdata(yyyy,mm)
 %
 % OUTPUT:
 %
-% A spreadsheet consisting of the time (yyyy/mm/dd HH:00:00 where 
+% Spreadsheets consisting of the time (yyyy/mm/dd HH:00:00 where 
 % HH = hour) and component (X, Y, Z) of the files that are missing 
 % (i.e. data have not been collected as miniseed files)
 % 
 %Last modified: April 17, 2020 by Yuri Tamama
-
-%Test input:
-%yyyy=2017;
-%mm=1:12;
 
 
 %Set Parameters 
@@ -121,32 +117,100 @@ for m = 1:nummonths
         end
     end
 end
+missing_comp = transpose(missing_comp);
+missing_date = transpose(missing_date); 
+totalmissing = length(missing_date);
 
-%convert missing date array to datetime
-missing_date = datetime(missing_date,'InputFormat','yyyy-MM-dd HH:mm:ss');  
 
-
-%By now we should have two arrays of the same length, whose contents tell
+%By now we should have two arrays, whose contents tell
 %which data files are 'missing', in other words, which times did
 %the seismometer not collect data
 
-%Let's save this information for future use
-%convert information into a file
-missing_comp = transpose(missing_comp);
-missing_date = transpose(missing_date);
-missing_table = table(missing_comp, missing_date);
-missing_table.Properties.VariableNames = {'Component' 'Time'};
-nofiles = missing_table;  %set this table as the output variable
-if nummonths > 1
-    missing_file = sprintf('missingfiles_%s_months%dto%d.csv',...
-        yearstr,mm(1),mm(nummonths));
-else
-    missing_file = sprintf('missingfiles_%s_month%d.csv',yearstr,mm);
+%Now we should filter through those contents and see:
+%For a given "missing time", are the data missing 1, 2, or all 3 
+%displacement components?
+
+unique_date = unique(missing_date);  %get unique dates
+numunique = length(unique_date);
+nummissing = zeros(numunique,1);
+for u = 1:numunique
+    testtime = unique_date{u};
+    %check # of components missing
+    isthere = strcmp(testtime,missing_date);  
+    nummissing(u) = sum(isthere);
 end
 
-%Let's save this file
-savefile=fullfile(getenv('HRS'),missing_file);
-writetable(missing_table,savefile, 'Delimiter', '\t');
+%how many dates have what # of components missing?
+threecmp=sum(nummissing==3);
+twocmp=sum(nummissing==2);
+onecmp=sum(nummissing==1);
 
+%divide missing date and component arrays based on # components missing
+threecmp_date={};
+threecmp_comp={};
+twocmp_date={};
+twocmp_comp={};
+onecmp_date={};
+onecmp_comp={};
+
+%Iterate through all dates
+for t = 1:totalmissing
+    dateind = find(strcmp(missing_date{t},unique_date));
+    numcomps = nummissing(dateind);
+    
+    if numcomps == 3
+        threecmp_date{end+1} = missing_date{t};
+        threecmp_comp{end+1} = missing_comp{t};
+    elseif numcomps == 2
+        twocmp_date{end+1} = missing_date{t};
+        twocmp_comp{end+1} = missing_comp{t};
+    else
+        onecmp_date{end+1} = missing_date{t};
+        onecmp_comp{end+1} = missing_comp{t};
+    end
+end
+
+
+%Convert the date cell arrays to datetime
+threecmp_date=datetime(threecmp_date,'InputFormat','yyyy-MM-dd HH:mm:ss');
+twocmp_date=datetime(twocmp_date,'InputFormat','yyyy-MM-dd HH:mm:ss');
+onecmp_date=datetime(onecmp_date,'InputFormat','yyyy-MM-dd HH:mm:ss');
+
+%Transpose all arrays
+threecmp_date = transpose(threecmp_date);
+threecmp_comp = transpose(threecmp_comp);
+twocmp_date = transpose(twocmp_date);
+twocmp_comp = transpose(twocmp_comp);
+onecmp_date = transpose(onecmp_date);
+onecmp_comp = transpose(onecmp_comp);
+
+%Let's save this information for future use
+missing_table_three = table(threecmp_comp, threecmp_date);
+missing_table_two = table(twocmp_comp, twocmp_date);
+missing_table_one = table(onecmp_comp, onecmp_date);
+missing_table_three.Properties.VariableNames = {'Component' 'Time'};
+missing_table_two.Properties.VariableNames = {'Component' 'Time'};
+missing_table_one.Properties.VariableNames = {'Component' 'Time'};
+
+if nummonths > 1
+    file_three = sprintf('3compmissing_%s_months%dto%d.csv',...
+        yearstr,mm(1),mm(nummonths));
+    file_two = sprintf('2compmissing_%s_months%dto%d.csv',...
+        yearstr,mm(1),mm(nummonths));
+    file_one = sprintf('1compmissing_%s_months%dto%d.csv',...
+        yearstr,mm(1),mm(nummonths));
+else
+    file_three = sprintf('3compmissing_%s_month%d.csv',yearstr,mm);
+    file_two = sprintf('2compmissing_%s_month%d.csv',yearstr,mm);
+    file_one = sprintf('1compmissing_%s_month%d.csv',yearstr,mm);
+end
+
+%Save files
+savefilethree=fullfile(getenv('HRS'),file_three);
+savefiletwo=fullfile(getenv('HRS'),file_two);
+savefileone=fullfile(getenv('HRS'),file_one);
+writetable(missing_table_three,savefilethree, 'Delimiter', '\t');
+writetable(missing_table_two,savefiletwo, 'Delimiter', '\t');
+writetable(missing_table_one,savefileone, 'Delimiter', '\t');
 
 
