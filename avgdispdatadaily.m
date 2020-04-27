@@ -14,7 +14,7 @@ function avgdispdatadaily(yyyy,mm,dd)
 %a .csv file containing average magnitude of displacement for each day
 %of data we process
 %
-%last edited: April 16, 2020 by Yuri Tamama
+%last edited: April 27, 2020 by Yuri Tamama
 
 
 %parameters
@@ -172,7 +172,9 @@ if numdays > 1
 else
     filename=sprintf('%d_%d_%ddispdatadaily.csv',yyyy,mm,dd);
 end
-savefile=fullfile(getenv('MT'),filename);
+
+yeardir=strcat(num2str(yyyy),'longterm');
+savefile=fullfile(getenv('MC'),num2str(yyyy),yeardir,filename);
 writetable(dtable,savefile);
 
 

@@ -16,12 +16,12 @@ function avgdispdataplot(filename, yyyy, mm, type)
 %OUTPUT
 %time series plot of the data
 %
-%last edited April 16, 2020 by Yuri Tamama
-
+%last edited April 27, 2020 by Yuri Tamama
 
 %load the first (or only) .csv
 numfiles = length(filename);
-getfile=fullfile(getenv('MT'),filename{1});
+yeardir=strcat(num2str(yyyy),'longterm');
+getfile=fullfile(getenv('MC'),num2str(yyyy),yeardir,filename{1});
 
 avgdata = readtable(getfile);
 date=avgdata.(1);
@@ -34,7 +34,7 @@ numpoints(1)=length(date);
 %load more .csv's if applicable
 if numfiles > 1
     for f = 2:numfiles
-        newfile=fullfile(getenv('MT'),filename{f});
+        newfile=fullfile(getenv('MC'),num2str(yyyy),yeardir,filename{f});
         
         %load csv
         newdata = readtable(newfile);  
@@ -105,7 +105,7 @@ if numfiles > 1
             'Avg. Daily Magnitude of Displacement in %s/%d',monthstr,yyyy);
     end
 else
-    monthstr=monthnames(mm);
+    monthstr=monthnames{mm};
     if type == 1
         titlestr = sprintf(...
             'Avg. Hr. Magnitude of Displacement in %s/%d',monthstr,yyyy);
@@ -172,7 +172,8 @@ else
         savename=sprintf('%d_month%davgdispdaily',yyyy,mm);
     end
 end
-savefile=fullfile(getenv('MT'),savename);
+
+savefile=fullfile(getenv('MC'),num2str(yyyy),yeardir,savename);
 print('-depsc',savefile);  
 print('-djpeg',savefile);
 
