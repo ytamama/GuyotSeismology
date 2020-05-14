@@ -19,7 +19,7 @@ function mcsummary(filename, year, parameter, plotting)
 % If chosen, histograms showing the distribution of the chosen parameter 
 % among the earthquakes recorded in the year
 % 
-% Last Modified: May 4, 2020 by Yuri Tamama
+% Last Modified: May 14, 2020 by Yuri Tamama
 % 
 % Reference:
 % Earthquake catalog information from IRIS's fdsnws-event service
@@ -27,9 +27,9 @@ function mcsummary(filename, year, parameter, plotting)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load data
-% Insert directory where data are stored
+% Insert applicable directory!
 yearstr=num2str(year);
-filename=fullfile(getenv(''),filename);
+filename=fullfile(getenv(),filename);
 data=load(filename);
 if parameter == 1      %Depth
     plotvar=data(:,5);
@@ -62,7 +62,7 @@ maxvar=max(plotvar);
 meanvar=round(mean(plotvar),2);
 medvar=median(plotvar);
 stdev=round(std(plotvar),2);
-% Dataset without outliers
+% Data without outliers
 notoutlier=plotvar(~isoutlier(plotvar));
 min_no=min(notoutlier);
 max_no=max(notoutlier);
@@ -83,9 +83,7 @@ stattable=table(areoutliers,mins,maxes,means,medians,sdevs);
 stattable.Properties.VariableNames = {'Outliers' 'Minimum' 'Maximum'...
     'Mean' 'Median' 'StandardDeviation'};
 savetable=strcat(savestr,'stats.csv');
-
-% Insert directory where table will be stored
-savetable=fullfile(getenv(''),savetable);
+savetable=fullfile(getenv(),savetable);
 writetable(stattable,savetable);
 
 
@@ -116,9 +114,8 @@ if plotting == 1
         'Location','best');
 
     % Save this histogram
-    % Insert directory where this will be stored
     saveplot=strcat(savestr,'histogram');
-    saveplot=fullfile(getenv(''),saveplot);
+    saveplot=fullfile(getenv(),saveplot);
     print('-depsc',saveplot);  
 
 
@@ -147,10 +144,9 @@ if plotting == 1
     legend_no=legend('Distribution','Min','Max','Mean','Median',...
         'Location','best');
 
-    % Save this histogram
-    % Insert directory where this will be stored
+    % Save this histogram into applicable directory
     saveplot_no=strcat(savestr,'histogram_nooutliers');
-    saveplot_no=fullfile(getenv(''),saveplot_no);
+    saveplot_no=fullfile(getenv(),saveplot_no);
     print('-depsc',saveplot_no);  
 
 end

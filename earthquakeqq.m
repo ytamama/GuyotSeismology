@@ -20,7 +20,7 @@ function earthquakeqq(filename1, filename2, year1, year2, parameter)
 % a qq plot, whose linearity tells us how similarly is the parameter 
 % distributed between the two files/years
 % 
-% Last modified: May 4, 2020 by Yuri Tamama
+% Last Modified by Yuri Tamama, 05/08/2020
 % 
 % Reference:
 % Earthquake catalog information from IRIS's fdsnws-event service
@@ -28,19 +28,18 @@ function earthquakeqq(filename1, filename2, year1, year2, parameter)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load the data from the two files
+% Insert applicable directory!
 yearstr1=num2str(year1);
 yearstr2=num2str(year2);
-
-% Insert name of directory where data are stored
-filename1=fullfile(getenv(''),filename1);
-filename2=fullfile(getenv(''),filename2);
+filename1=fullfile(getenv(),filename1);
+filename2=fullfile(getenv(),filename2);
 data1=load(filename1);
 data2=load(filename2);
 if parameter == 1      %Depth
     var1=data1(:,5);
     var2=data2(:,5);
     savestr=strcat(yearstr1,yearstr2);
-    savestr=strcat(savestr,'_depth');  %for saving
+    savestr=strcat(savestr,'_depth');  %for saving 
     titlestr=sprintf('Earthquake Depths in %d to %d',year1,year2);
 elseif parameter == 2  %Magnitude
     var1=data1(:,6);
@@ -65,10 +64,9 @@ title(titlestr);
 xlabel(sprintf('Quantiles in %d',year1));
 ylabel(sprintf('Quantiles in %d',year2));
 
-% Save the qq plot
-% Insert directory where this will be stored
+% Save the qq plot in applicable directory
 saveplot=strcat(savestr,'_qqplot');
-saveplot=fullfile(getenv(''),saveplot);
+saveplot=fullfile(getenv(),saveplot);
 print('-depsc',saveplot);  
 
 
