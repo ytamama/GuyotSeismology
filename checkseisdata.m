@@ -26,20 +26,20 @@ numcomp = 3;
 numhrs = 24;
 
 %Set number of days
-isleap = isleapyear(yyyy,1);  %check if Leap Year (see Meeus repository)
+leap = isleap(yyyy,1);  %check if Leap Year (see Meeus repository)
 %# days in each month
 numdays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; 
 if nummonths > 1
     DD = zeros(nummonths,1);
     for m = 1:nummonths
         DD(m) = numdays(mm(m));
-        if (isleap == 1) && (mm(m) == 2)  %February and Leap Year
+        if (leap == 1) && (mm(m) == 2)  %February and Leap Year
             DD(m) = DD(m) + 1;
         end
     end
 else
     DD = numdays(mm);
-    if (isleap == 1) && (mm == 2)   %February and Leap Year
+    if (leap == 1) && (mm == 2)   %February and Leap Year
         DD = DD + 1;
     end
 end
