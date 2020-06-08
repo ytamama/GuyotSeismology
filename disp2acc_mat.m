@@ -48,7 +48,7 @@ tlen = length(trange);
 yyyy=header.NZYEAR;
 [mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
 HH=header.NZHOUR;
-datestring = sprintf("%d/%d/%d %d GMT",mm,dd,yyyy,HH);
+datestring = sprintf('%d/%d/%d %d GMT',mm,dd,yyyy,HH);
 
 % Crop displacement vectors as needed
 firstind = (trange(1))*100 + 1;   
@@ -92,22 +92,23 @@ if makeplot==1
   az_max = max(abs(accz));
   az_lim = 1.1*az_max;
     
+  % Plot
   figure()
   subplot(3,1,1)
   plot(trange, accx);
   ylim([-ax_lim ax_lim])
-  ylabel("X (nm/s^2)")
-  title({"Acceleration of Seismic Waves";...
-    "Recorded at Guyot Hall at Princeton University";datestring})
+  ylabel('X (nm/s^2)')
+  title({'Acceleration of Seismic Waves';...
+    'Recorded at Guyot Hall at Princeton University';datestring})
   subplot(3,1,2)
   plot(trange, accy);
   ylim([-ay_lim ay_lim])
-  ylabel("Y (nm/s^2)")
+  ylabel('Y (nm/s^2)')
   subplot(3,1,3)
   plot(trange, accz);
   ylim([-az_lim az_lim])
-  ylabel("Z (nm/s^2)")
-  xlabel(sprintf("Time (s) since %d:00:00 GMT",HH))
+  ylabel('Z (nm/s^2)')
+  xlabel(sprintf('Time (s) since %d:00:00 GMT',HH))
 end
 
 

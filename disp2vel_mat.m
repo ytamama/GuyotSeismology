@@ -41,14 +41,10 @@ header=hx;
 defval('makeplot',0);
 defval('seconds',[header.B header.E]);
 
-% Set times during which the data were collected
+% Find the times during which the data were collected
 deltat = header.DELTA;
 trange = [seconds(1):deltat:seconds(2)];
 tlen = length(trange);
-yyyy=header.NZYEAR;
-[mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
-HH=header.NZHOUR;
-datestring = sprintf("%d/%d/%d %d GMT",mm,dd,yyyy,HH);
 
 % Crop displacement vectors as needed
 firstind = (trange(1))*100 + 1;   
@@ -84,7 +80,14 @@ end
 
 % Plot a time series of velocity vs time, if requested
 if makeplot==1
-% Find maximum magnitudes of velocity to set as axis limits  
+  % Find the date/time strings that would be necessary to have on
+  % the plot
+  yyyy=header.NZYEAR;
+  [mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
+  HH=header.NZHOUR;
+  datestring = sprintf('%d/%d/%d %d GMT',mm,dd,yyyy,HH);   
+   
+  % Find maximum magnitudes of velocity to set as axis limits  
   vx_max = max(abs(velx));
   vx_lim = 1.1*vx_max;
   vy_max = max(abs(vely));
@@ -92,22 +95,23 @@ if makeplot==1
   vz_max = max(abs(velz));
   vz_lim = 1.1*vz_max;
   
+  % Plot
   figure()
   subplot(3,1,1)
   plot(trange, velx);
   ylim([-vx_lim vx_lim])
-  ylabel("X (nm/s)")
-  title({"Velocity of Seismic Waves";...
-    "Recorded at Guyot Hall at Princeton University";datestring})
+  ylabel('X (nm/s)')
+  title({'Velocity of Seismic Waves';...
+    'Recorded at Guyot Hall at Princeton University';datestring})
   subplot(3,1,2)
   plot(trange, vely);
   ylim([-vy_lim vy_lim])
-  ylabel("Y (nm/s)")
+  ylabel('Y (nm/s)')
   subplot(3,1,3)
   plot(trange, velz);
   ylim([-vz_lim vz_lim])
-  ylabel("Z (nm/s)")
-  xlabel(sprintf("Time (s) since %d:00:00 GMT",HH))
+  ylabel('Z (nm/s)')
+  xlabel(sprintf('Time (s) since %d:00:00 GMT',HH))
 end
 
 end
