@@ -41,14 +41,10 @@ header=hx;
 defval('makeplot',0);
 defval('seconds',[header.B header.E]);
 
-% Set times during which the data were collected
+% Find the times during which the data were collected
 deltat = header.DELTA;
 trange = [seconds(1):deltat:seconds(2)];
 tlen = length(trange);
-yyyy=header.NZYEAR;
-[mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
-HH=header.NZHOUR;
-datestring = sprintf('%d/%d/%d %d GMT',mm,dd,yyyy,HH);
 
 % Crop displacement vectors as needed
 firstind = (trange(1))*100 + 1;   
@@ -84,6 +80,13 @@ end
 
 % Plot a time series of acceleration vs time, if requested
 if makeplot==1
+  % Find the date/time strings that would be necessary to have on
+  % the plot   
+  yyyy=header.NZYEAR;
+  [mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
+  HH=header.NZHOUR;
+  datestring = sprintf('%d/%d/%d %d GMT',mm,dd,yyyy,HH);
+
   % Find maximum magnitudes of acceleration to set as axis limits
   ax_max = max(abs(accx));
   ax_lim = 1.1*ax_max;
