@@ -1,4 +1,4 @@
-function [accdata,header]=disp2acc_sac(sacfile,makeplot)
+function [accdata,header,accplot]=disp2acc_sac(sacfile,makeplot)
 % 
 % Computes the acceleration recorded by the seismometer at Guyot Hall, 
 % Princeton University, from its displacement data recorded in a 
@@ -14,20 +14,17 @@ function [accdata,header]=disp2acc_sac(sacfile,makeplot)
 % OUTPUTS
 % accdata : Acceleration, calculated from displacement via differentiation
 % header : Updated header
-% A plot of acceleration vs. time, if desired
+% accplot : The plot of acceleration vs. time, if desired
 % 
 % References
 % Uses readsac.m to read in the displacement data
-% written by Prof. Frederik Simons and Anna Van Brummen
-% (in csdms-contrib/slepian_oscar repository)
+% in csdms-contrib/slepian_oscar 
 % 
-% Uses dat2jul.m, written by Prof. Frederik Simons, also in 
-% also in csdms-contrib/slepian_oscar
+% Uses dat2jul.m also in csdms-contrib/slepian_oscar
 % 
-% Uses defval.m, written by Prof. Frederik Simons and by 
-% ebrevdo-at-alumni-princeton.edu (in slepian_alpha repository)
+% Uses defval.m in csdms-contrib/slepian_alpha
 % 
-% Last Modified: 06/09/2020 by Yuri Tamama
+% Last Modified: 06/11/2020 by Yuri Tamama
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set the default value
@@ -62,7 +59,9 @@ if makeplot==1
   % Find the date/time strings that would be necessary to have on
   % the plot
   yyyy=header.NZYEAR;
-  [mm,dd,~]=jul2dat(yyyy,header.NZJDAY);
+  datenums=jul2dat(yyyy,header.NZJDAY);
+  mm=datenums(1);
+  dd=datenums(2);
   HH=header.NZHOUR;
   datestring = sprintf('%d/%d/%d %d GMT',mm,dd,yyyy,HH);     
     
@@ -72,10 +71,11 @@ if makeplot==1
   
   % Plot
   figure()
-  plot(trange,amax);
+  accplot=plot(trange,accdata);
+  xlim([header.B header.E+10])
   ylim([-alim alim])
   ylabel('Acceleration (nm/s^2)') 
   xlabel(sprintf('Time (s) since %d:00:00 GMT',HH))
-  title({'Acceleration of Seismic Waves';...
+  title({'Ground Acceleration Computed from Displacement';...
     'Recorded at Guyot Hall at Princeton University';datestring})
 end
