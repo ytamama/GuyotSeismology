@@ -2,8 +2,7 @@ function sacname=makesac(evtdate,component)
 % 
 % Function to find the miniseed file corresponding to the hour of an 
 % inputted event and its component, and subsequently generate a SAC file
-% in the current working directory IF such an hourly SAC file does not 
-% exist in the current working directory
+% if such an hourly SAC file does not already exist
 % 
 % INPUTS
 % evtdate : A datetime
@@ -13,21 +12,27 @@ function sacname=makesac(evtdate,component)
 %             e.g. 'X', 'Y', or 'Z'
 %             Default: 'X'
 % 
-% OUTPUT
+% OUTPUTS
 % sacname : The name of the SAC file that has been generated
 %           In the event that the seismometer, when collecting data, 
 %           abruptly stops and resumes data collection, multiple SAC 
 %           files may be generated for the inputted hour. In that case, 
-%           the user will be asked whether or not he/she/they would like 
-%           to use the most recently created SAC file.
+%           the program will attempt to concatenate those SAC files 
+%           and return the resulting product.
+%           If, for whatever reason, a complete hourly SAC file without 
+%           missing data cannot be made, then an empty string will be 
+%           returned in place of the SAC file's name
+%
 % 
 % References
 % Conversion process from .miniseed to SAC from mcms2mat.m and 
 % mcms2sac, in csdms-contrib/slepian_oscar
+% 
+% Uses writesac.m and dat2jul.m, in csdms-contrib/slepian_oscar
 %
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 06/12/2020
+% Last Modified by Yuri Tamama, 06/28/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -37,22 +42,24 @@ defval('evtdate',datetime('20200101000000','InputFormat',...
 defval('component','X');
 
 % Search for the miniseed file(s) that may exist
-evtyear=num2str(evtdate.Year);
-evtmon=datenum2str(evtdate.Month,0);
-evtday=datenum2str(evtdate.Day,0);
-evthr=datenum2str(evtdate.Hour,0);
-% Insert where you keep your miniseed files!
-searchdir=fullfile(getenv()); 
+evtyearstr=num2str(evtdate.Year);
+evtmonstr=datenum2str(evtdate.Month,0);
+evtdaystr=datenum2str(evtdate.Day,0);
+evthrstr=datenum2str(evtdate.Hour,0);
+% Insert your own directory!
+searchdir=fullfile(getenv('')); 
 
-% Check if an hourly SAC file exists yet or not in the current 
-% working directory first
+% Check if an hourly SAC file exists yet or not 
 sacnamefmt='PP.S0001.00.HH%s.D.%s.%s.%s0000.SAC';
-% Need JD of the given date (code from mcms2mat.m)
-jd=ceil(datenum(evtdate.Year,evtdate.Month,evtdate.Day)-datenum(...
-    evtdate.Year,00,00));
+% Directory where the SAC file may already exist
+% (insert your own directory!)
+sacsearchdir=fullfile(getenv('')); 
+% Need JD of the given date 
+jd=dat2jul(evtdate.Month,evtdate.Day,evtdate.Year);
 jdstr=datenum2str(jd,1); 
 % Name of potentially existing SAC file
-maybexist=sprintf(sacnamefmt,component,evtyear,jdstr,evthr);
+maybexist=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
+maybexist=fullfile(sacsearchdir,maybexist);
 if exist(maybexist)==2
   % Assign to the output, the existing SAC file
   sacname=maybexist;
@@ -61,51 +68,105 @@ else
   % Check for both types of possible .miniseed names
   msname=sprintf(...
     'PP.S0001.00.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',...
-                component,evtyear,evtmon,evtday,evthr);
+                component,evtyearstr,evtmonstr,evtdaystr,evthrstr);
   msname=fullfile(searchdir,msname);   
   msname2=sprintf(...
     'S0001.HH%s_MC-PH1_0248_%s%s%s_%s0000.miniseed',...
-                component,evtyear,evtmon,evtday,evthr);
+                component,evtyearstr,evtmonstr,evtdaystr,evthrstr);
   msname2=fullfile(searchdir,msname2);
 
   % Convert the .miniseed to SAC if it exists
   if (exist(msname) == 0) && (exist(msname2) == 0)
-    error('MINISEED file not found.')   
+    dispdate=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
+    disp('MINISEED file not found for %s. Exiting function.',...
+        warningtime);   
+    sacname='';
+    return
   elseif exist(msname)==2
     % Convert to SAC using mseed2sac, from mcms2mat.m and mcms2sac
     [~,cmdout]=system(sprintf('mseed2sac %s',msname));
     % Get the name of the SAC file
-    % Ask the user for input only if multiple SAC files were generated
-    % for that one hour
     cmdcells=strsplit(cmdout);
-    sacname=cmdcells{length(cmdcells)-1};
-    if length(cmdcells) ~= 6       
-      reply=input(sprintf('%s was created. Would you like to use that?',...
-        sacname),'s');
-      % Return the most recently made SAC file if the user replies 
-      % with nothing or with an affirmative. 
-      % Otherwise return an empty string
-      if strcmpi(reply(1),'Y')==0
+    % If multiple files were generated, try to concatenate them together
+    if length(cmdcells) ~= 6    
+      problemtime=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
+      fprintf('Multiple SAC files were made for %s. These files will be concatenated.',...
+          problemtime);
+      % Names of SAC files are in the indices divisible by 5
+      indices=1:length(cmdcells);
+      indicesdiv5=indices(mod(indices,5)==0);
+      sacnames=cmdcells(indicesdiv5);
+      % Combine the data of these SAC files 
+      [newdata,newhdr]=combinesacpieces(sacnames,evtdate,component);
+      % Sequester SAC pieces to a "recycle" directory
+      [status,cmdout]=system(sprintf('mv PP.S0001.*.SAC %s',getenv('')));
+      % Note: if the data in newdata are all NaN, then the data are unusable
+      % (see combinesacpieces.m)
+      if mean(isnan(newdata))==1
+        disp('Data are missing from this hour and are thus unusable. Exiting function.')
         sacname='';
+        return
+      end      
+      % Write to new SAC file
+      sacname=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
+      writesac(newdata,newhdr,sacname);
+    else
+      % Even if one file is made, that file may be missing data
+      % Compare the SAC file name with one that should be made if 
+      % the file were not missing data    
+      sacname=cmdcells{length(cmdcells)-1};
+      sacnamemdl=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
+      if strcmp(sacname,sacnamemdl)==0
+        disp('The SAC file has missing data. It is not usable.')
+        sacname='';
+        return        
       end
     end   
   else
     % Convert to SAC
     [~,cmdout]=system(sprintf('mseed2sac %s',msname2));
-    % Get the name of the SAC file
-    % Ask the user for input only if multiple SAC files were generated
+    % Get the name of the SAC filed
     cmdcells=strsplit(cmdout);
-    oldname=cmdcells{length(cmdcells)-1}; 
-    if length(cmdcells) ~= 15       
-      reply=input(sprintf('%s was created. Would you like to use that?',...
-        oldname),'s');
-      % Return an empty string if the user replies in the negative
-      if strcmpi(reply(1),'Y')==0
-        oldname='';
+    % If multiple files were generated, try to concatenate them together
+    if length(cmdcells) ~= 15    
+      problemtime=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
+      fprintf('Multiple SAC files were made for %s. These files will be concatenated.',...
+          problemtime);
+      % Names of SAC files are in the indices divisible by 14
+      indices=1:length(cmdcells);
+      indicesdiv14=indices(mod(indices,14)==0);
+      sacnames=cmdcells(indicesdiv14);
+      % Combine the data 
+      [newdata,newhdr]=combinesacpieces(sacnames,evtdate,component);
+      % Sequester SAC pieces to a "recycle" directory
+      [status,cmdout]=system(sprintf('mv XX.S0001..*.SAC %s',getenv('')));   
+      % Note: if the data in newdata are all NaN, then the data are unusable
+      % (see combinesacpieces.m)
+      if mean(isnan(newdata))==1
+        disp('Data are missing from this hour and are thus unusable. Exiting function.')
         sacname='';
+        return
       end
+      % Edit the header to add the network name!
+      newhdr.KNETWK='PP';  
+      if isfield(newhdr,'KHOLE')
+        newhdr.KHOLE='00';
+      end     
+      % Write to new SAC file
+      sacname=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
+      writesac(newdata,newhdr,sacname);
+      oldname='';
+    else
+      % Even if one file is made, that file may be missing data
+      oldname=cmdcells{length(cmdcells)-1}; 
+      oldnamefmt='XX.S0001..HH%s.D.%s.%s.%s0000.SAC';
+      oldnamemdl=sprintf(oldnamefmt,component,evtyearstr,jdstr,evthrstr);
+      if strcmp(oldname,oldnamemdl)==0
+        disp('The SAC file has missing data. It is not usable.')
+        sacname='';
+        return        
+      end      
     end   
-  
     % This miniseed file has the issue where the network name is not 
     % defined... Let's fix that if we made the SAC file
     if ~isempty(oldname)
