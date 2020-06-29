@@ -38,16 +38,14 @@ function [newdata,header]=cutsac(filenames,arrtime,intstart,intend,rowdata,evthe
 % References:
 % Code to convert from a .miniseed file to a .SAC file and
 % apply instrument response correction from
-% mcms2mat.m, in csdms-contrib/slepian_oscar, 
-% by Professor Frederik Simons and Anna Van Brummen
+% mcms2mat.m, in csdms-contrib/slepian_oscar
 % 
 % Uses readsac.m, writesac.m, plotsac.m to read in, create, and plot
-% the data from SAC files 
-% Programs also by Professor Simons and from csdms-contrib/slepian_oscar
+% the data from SAC files, in csdms-contrib/slepian_oscar
 % 
 % Consulted the SAC manual, from http://ds.iris.edu/files/sac-manual/
 % 
-% Last Modified by Yuri Tamama, 06/12/2020
+% Last Modified by Yuri Tamama, 06/26/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -121,11 +119,11 @@ end
 
 % Add information about the event to the header if requested
 if evtheader==1
-  header.EVLA=rowdata.Var3;
-  header.EVLO=rowdata.Var4;
-  header.EVDP=rowdata.Var5;
-  header.MAG=rowdata.Var6;
-  header.GCARC=rowdata.Var7;
+  header.EVLA=double(rowdata.Var3);
+  header.EVLO=double(rowdata.Var4);
+  header.EVDP=double(rowdata.Var5);
+  header.MAG=double(rowdata.Var6);
+  header.GCARC=double(rowdata.Var7);
   header.DIST=grcdist([header.EVLO header.EVLA]);
   % SAC won't let me change the EVENT ID header, so I'll add the 
   % EVENT ID to the event name header
