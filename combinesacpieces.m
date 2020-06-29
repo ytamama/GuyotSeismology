@@ -81,9 +81,8 @@ if isnan(newdata(1))
   prevmon=datenum2str(prevdate.Month,0);
   prevday=datenum2str(prevdate.Day,0);
   prevhr=datenum2str(prevdate.Hour,0);
-  % Directory to search miniseed files
-  searchdir=fullfile(msdir,sprintf('%s/%s/%s',...
-    prevyear,prevmon,prevday));   
+  % Directory to search miniseed files - insert your own!
+  searchdir=fullfile(msdir,'');   
 
   % Find the miniseed file
   % Use the miniseed files applicable to your network!
