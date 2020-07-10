@@ -1,4 +1,5 @@
-function [newdata,header]=cutsac(filenames,arrtime,intstart,intend,rowdata,evtheader)
+function newfile=cutsac(filenames,starttime,fintime,newname,...
+    rowdata,evtheader)
 % 
 % Function that takes a number of SAC files of the same component 
 % and of consecutive hours and trims them down to one SAC file whose 
@@ -12,16 +13,14 @@ function [newdata,header]=cutsac(filenames,arrtime,intstart,intend,rowdata,evthe
 %             The SAC files should be of consecutive hours, ordered from 
 %             earliest to latest, and of the same directional component
 %             ('X', 'Y', or 'Z')
-% arrtime : The arrival time of the event recorded
-% intstart : The number of seconds before the arrival time at which 
-%            the time interval begins (default: 60)
-% intend : The number of seconds after the arrival time at which the
-%          time interval ends (default: 360)
+% starttime : The time at which we would like to begin the interval
+% fintime : The time at which we would like to end the interval
+% newname : The name of the new file we will write 
 % rowdata : One row of IRIS catalog data, created by mcms2evt, 
 %           corresponding to the event
 %           Columns (left to right): eventID, date of event (as a string),
 %           event latitude, event longitude, depth, event magnitude,
-%           geoid distance from station to event (degrees), spherical 
+%           geoid distance from station to event (degrees), Great Circle
 %           distance from station to event (degrees), and travel time
 %           of the first arrival to Guyot Hall (in seconds)
 % evtheader : Do we want to add information about the event recorded in 
@@ -36,98 +35,97 @@ function [newdata,header]=cutsac(filenames,arrtime,intstart,intend,rowdata,evthe
 % See mcevt2sac.m and mcevtfiles2sac.m
 % 
 % References:
-% Code to convert from a .miniseed file to a .SAC file and
-% apply instrument response correction from
+% Accessing SAC commands from MATLAB from
 % mcms2mat.m, in csdms-contrib/slepian_oscar
 % 
 % Uses readsac.m, writesac.m, plotsac.m to read in, create, and plot
 % the data from SAC files, in csdms-contrib/slepian_oscar
 % 
+% Uses defval.m, from csdms-contrib/slepian_alpha
+% 
 % Consulted the SAC manual, from http://ds.iris.edu/files/sac-manual/
 % 
-% Last Modified by Yuri Tamama, 06/26/2020
+% Last Modified by Yuri Tamama, 07/10/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Set default values
-defval('intstart',60);
-defval('intend',360);
 defval('evtheader',0);
 
 % Check total length of interval
-inttotal=intstart+intend;
+inttotal=seconds(fintime-starttime);
 if inttotal>3600
   warning('Intervals longer than 1 hour are discouraged.')
 end 
 
-% Find times corresponding to interval start and end
-pretime=arrtime;
-pretime.Second=arrtime.Second-intstart;
-posttime=arrtime;
-posttime.Second=arrtime.Second+intend;
-
 % How many files do we have? 
 % 1 file -- 1 hour
 if length(filenames)==1
-  % Load the file 
-  [seisdata,header,~,~,~]=readsac(filenames{1},0);
+  sacfile=filenames{1};
+  % Figure out at where we trim the file
+  startpt=round((starttime.Minute*60)+starttime.Second,1);
+  finpt=round((fintime.Minute*60)+fintime.Second,1);
+  newend=finpt-startpt;
+  % Cut file
+  cutcmd=sprintf(...
+    'echo "r %s ; cut %g %g ; read ; chnhdr B 0 E %g ; w %s ; q" | /usr/local/sac/bin/sac',...
+    sacfile,startpt,finpt,newend,newname);
+  [status,cmdout]=system(cutcmd);   
   
-  % Figure out at what indices we trim the file
-  arrivaltime=(arrtime.Minute*60)+arrtime.Second;
-  arrivalind=arrivaltime*100+1;
-  startind=arrivalind-(intstart*100);
-  endind=arrivalind+(intend*100); 
-    
 % Multiple files -- multiple hours
 else
-  % Iterate through all the files, for each hour between interval
-  % start and end
   mcdate=pretime;
+  readcmd='r %s';
   for i=1:length(filenames)
-    % Read in the SAC files and concatenate their data
-    if i==1
-      [seisdata,header]=readsac(filenames{1},0);
-    else
-      [tempdata,~]=readsac(filenames{i},0);
-      seisdata=vertcat(seisdata,tempdata);
-    end
+    % Construct a SAC command to read through all files
+    readcmd=sprintf(readcmd,sacname);  
+    if i<(length(filenames))
+      readcmd=strcat(readcmd,' %s');   
+    end 
     % Move onto the next hour
     mcdate.Hour=mcdate.Hour+1;
   end
   
   % Figure out at what indices we trim the files
-  arrivaltime=(arrtime.Minute*60)+arrtime.Second;
-  % The arrival time may not be captured in the earliest SAC file
-  arrivaltime=arrivaltime+3600*(arrtime.Hour-header.NZHOUR);
-  arrivalind=arrivaltime*100+1;
-  startind=arrivalind-(intstart*100);
-  endind=arrivalind+(intend*100);
- 
+  startpt=round((starttime.Minute*60)+starttime.Second,1);
+  finpt=round(startpt+seconds(fintime-starttime),1);
+  newend=finpt-startpt;
+  
+  % Merge and cut the SAC file
+  mergecmd=sprintf(...
+    'echo "%s ; merge ; w %s ; q" | /usr/local/sac/bin/sac',...
+    readcmd,newname);
+  [status,cmdout]=system(mergecmd);
+  cutcmd=sprintf(...
+    'echo "r %s ; cut %g %g ; read ; chnhdr B 0 E %g ; w %s ; q" | /usr/local/sac/bin/sac',...
+    newname,startpt,finpt,newend,newname);
+  [status,cmdout]=system(cutcmd);
 end    
 
-% Trim the SAC file and edit the header!
-allind=1:length(seisdata);
-newdata=seisdata((allind>=startind) & (allind<=endind));
-header.B=(pretime.Minute*60)+pretime.Second;
-header.E=(posttime.Minute*60)+posttime.Second;
-header.NPTS=length(newdata);
-header.NZMIN=pretime.Minute;
-header.NZSEC=floor(pretime.Second/1);
+% Edit the header to have the new start time!
+newjd=dat2jul(starttime.Month,starttime.Day,starttime.Year);
+newhr=starttime.Hour;
+newmin=starttime.Minute;
+newsec=floor(starttime.Second/1);
 if mod(pretime.Second,1) > 0
-  header.NZMSEC=round(mod(pretime.Second,1)*1000);  
+  newmsec=round(mod(starttime.Second,1)*1000);  
 end
+timecmd=sprintf(...
+  'echo "r %s ; chnhdr NZJDAY %d NZHOUR %d NZMIN %d NZSEC %d NZMSEC %d ; w %s ; q" | /usr/local/sac/bin/sac',...
+  newname,newjd,newhr,newmin,newsec,newmsec,newname);
+[status,cmdout]=system(timecmd);
 
 % Add information about the event to the header if requested
 if evtheader==1
-  header.EVLA=double(rowdata.Var3);
-  header.EVLO=double(rowdata.Var4);
-  header.EVDP=double(rowdata.Var5);
-  header.MAG=double(rowdata.Var6);
-  header.GCARC=double(rowdata.Var7);
-  header.DIST=grcdist([header.EVLO header.EVLA]);
-  % SAC won't let me change the EVENT ID header, so I'll add the 
-  % EVENT ID to the event name header
-  header.KEVNM=evtstr; 
+  hdrevla=round(rowdata.Var3,1);
+  hdrevlo=round(rowdata.Var4,1);
+  hdrevdp=round(rowdata.Var5,1);
+  hdrmag=round(rowdata.Var6,1);
+  hdrchange=sprintf('chnhdr EVLA %g EVLO %g EVDP %g MAG %g LCALDA TRUE',...
+    hdrevla,hdrevlo,hdrevdp,hdrmag);
+  hdrcmd=sprintf(...
+    'echo "r %s ; %s ; w %s ; q" | /usr/local/sac/bin/sac',...
+    newname,hdrchange,newname);
+  [status,cmdout]=system(hdrcmd);
 end
 
 
