@@ -2,10 +2,10 @@ function sacname=makesac(evtdate,component)
 % 
 % Function to find the miniseed file corresponding to the hour of an 
 % inputted event and its component, and subsequently generate a SAC file
-% if such an hourly SAC file does not already exist
+% if such an hourly SAC file does not exist 
 % 
 % INPUTS
-% evtdate : A datetime
+% evtdate : A datetime in UTC
 %           Default: January 1, 2020 at midnight
 % component : The directional component of the miniseed file the user 
 %             wants converted to SAC
@@ -19,10 +19,9 @@ function sacname=makesac(evtdate,component)
 %           files may be generated for the inputted hour. In that case, 
 %           the program will attempt to concatenate those SAC files 
 %           and return the resulting product.
-%           If, for whatever reason, a complete hourly SAC file without 
+%           If, for whatever reason, a complete hourly SAC file with no 
 %           missing data cannot be made, then an empty string will be 
 %           returned in place of the SAC file's name
-%
 % 
 % References
 % Conversion process from .miniseed to SAC from mcms2mat.m and 
@@ -32,7 +31,7 @@ function sacname=makesac(evtdate,component)
 %
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 06/28/2020
+% Last Modified by Yuri Tamama, 07/10/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -46,23 +45,30 @@ evtyearstr=num2str(evtdate.Year);
 evtmonstr=datenum2str(evtdate.Month,0);
 evtdaystr=datenum2str(evtdate.Day,0);
 evthrstr=datenum2str(evtdate.Hour,0);
-% Insert your own directory!
-searchdir=fullfile(getenv('')); 
+
+% Insert your own directory for:
+% Where you store miniseed files
+searchdir=''; 
+% Where you sequester SAC files we may never need 
+rfdir='';
 
 % Check if an hourly SAC file exists yet or not 
 sacnamefmt='PP.S0001.00.HH%s.D.%s.%s.%s0000.SAC';
 % Directory where the SAC file may already exist
-% (insert your own directory!)
-sacsearchdir=fullfile(getenv('')); 
+% Insert your own directory!
+sacsearchdir=''; 
 % Need JD of the given date 
 jd=dat2jul(evtdate.Month,evtdate.Day,evtdate.Year);
 jdstr=datenum2str(jd,1); 
-% Name of potentially existing SAC file
+% Name of potentially existing SAC files
 maybexist=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
 maybexist=fullfile(sacsearchdir,maybexist);
-if exist(maybexist)==2
+maybexist2=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
+if exist(maybexist)==2 
   % Assign to the output, the existing SAC file
   sacname=maybexist;
+elseif exist(maybexist2)==2
+  sacname=maybexist2;  
 else
   % Convert .miniseed files to SAC
   % Check for both types of possible .miniseed names
@@ -78,8 +84,8 @@ else
   % Convert the .miniseed to SAC if it exists
   if (exist(msname) == 0) && (exist(msname2) == 0)
     dispdate=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
-    disp('MINISEED file not found for %s. Exiting function.',...
-        warningtime);   
+    fprintf('MINISEED file not found for %s. Exiting function.',...
+        dispdate);   
     sacname='';
     return
   elseif exist(msname)==2
@@ -99,7 +105,7 @@ else
       % Combine the data of these SAC files 
       [newdata,newhdr]=combinesacpieces(sacnames,evtdate,component);
       % Sequester SAC pieces to a "recycle" directory
-      [status,cmdout]=system(sprintf('mv PP.S0001.*.SAC %s',getenv('')));
+      [status,cmdout]=system(sprintf('mv PP.S0001.*.SAC %s',rfdir));
       % Note: if the data in newdata are all NaN, then the data are unusable
       % (see combinesacpieces.m)
       if mean(isnan(newdata))==1
@@ -125,7 +131,7 @@ else
   else
     % Convert to SAC
     [~,cmdout]=system(sprintf('mseed2sac %s',msname2));
-    % Get the name of the SAC filed
+    % Get the name of the SAC file
     cmdcells=strsplit(cmdout);
     % If multiple files were generated, try to concatenate them together
     if length(cmdcells) ~= 15    
@@ -139,7 +145,7 @@ else
       % Combine the data 
       [newdata,newhdr]=combinesacpieces(sacnames,evtdate,component);
       % Sequester SAC pieces to a "recycle" directory
-      [status,cmdout]=system(sprintf('mv XX.S0001..*.SAC %s',getenv('')));   
+      [status,cmdout]=system(sprintf('mv XX.S0001..*.SAC %s',rfdir));   
       % Note: if the data in newdata are all NaN, then the data are unusable
       % (see combinesacpieces.m)
       if mean(isnan(newdata))==1
