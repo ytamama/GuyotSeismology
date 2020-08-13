@@ -243,7 +243,7 @@ for c=1:3
       lowerlim.Color=[.75 .75 .75];
     end
   end
-  if strcmp(axisstyle(4:6),'log')
+  if strcmp(axisstyle(length(axisstyle)-2:length(axisstyle)),'log')
     nowaxes.XScale='log';
     nowaxes.XLim=[nowaxes.XLim(1) samplefreq/2];
   end
