@@ -9,11 +9,13 @@ function locationstr=irisevtloc(evtid)
 % 
 % OUTPUT
 % locationstr : The name of the region where the seismic event took place
+% evlalo : The latitude and longitude of the event, formatted as a 
+%          vector with the latitude first, then longitude
 % 
 % References
 % Uses IRIS's event web service
 % 
-% Last Modified by Yuri Tamama, 07/22/2020
+% Last Modified by Yuri Tamama, 08/13/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -25,17 +27,36 @@ fullquery=strcat('wget "',queryurl,'" -O- -q | ');
 awkcmd=' awk -F "|" ''NR>1{print $12,$13}''';
 fullcmd=strcat(fullquery,awkcmd);
 [status,cmdout]=system(fullcmd);
-% Retrieve Location!
+% Retrieve location name
 locstrs=strsplit(cmdout);
 locationstr='';
-for i=2:length(locstrs)-1
-  tempstr=locstrs{i};
-  tempstr=strcat(tempstr(1),lower(tempstr(2:length(tempstr))));
-  if i>2
-    tempstr=sprintf(' %s ',tempstr);
+for j=2:length(locstrs)-1
+  tempstr=locstrs{j};
+  tempstr2='';
+  if length(tempstr)>1
+    for i=1:length(tempstr)
+      if i==1
+        tempchar=upper(tempstr(i));
+      elseif (i>1) && strcmp(tempstr(i-1),'-')
+        tempchar=upper(tempstr(i));
+      elseif (i<length(tempstr))
+        if strcmp(tempstr(i+1),'.') 
+          tempchar=upper(tempstr(i));
+          if ~strcmp(tempstr(i-1),upper(tempstr(i-1)))
+            tempchar=lower(tempstr(i));
+          end
+        else
+          tempchar=lower(tempstr(i));
+        end
+      else
+        tempchar=lower(tempstr(i));
+      end
+      tempstr2=strcat(tempstr2,tempchar);
+    end
   end
-  locationstr=strcat(locationstr,tempstr);
+  if j>2
+    tempstr2=sprintf(' %s ',tempstr2);
+  end
+  locationstr=strcat(locationstr,tempstr2);
 end
-
-
 
