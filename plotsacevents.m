@@ -73,7 +73,7 @@ function [figurehdls,saccsv]=plotsacevents(makefiles,saccsv,measval,frequency,..
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 %
 %
-% Last Modified by Yuri Tamama, 07/31/2020
+% Last Modified by Yuri Tamama, 09/02/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('makefiles',1);
@@ -92,7 +92,7 @@ defval('saveplots',0);
 defval('savedir','');
 defval('allorrand',[]);
 
-% Specify necessary directories to get data - insert your own!
+% Specify necessary directories for obtaining data - insert your own!
 datadir=getenv('');
 
 % Search for the events matching the inputted parameters
@@ -130,8 +130,7 @@ end
 % Find how long of an interval we wish to plot for all earthquakes
 maxtime=0;
 maxdist=0;
-% tlens=zeros(numevts,1);
-for i=1:25
+for i=1:numevts
   if isempty(randinds)
     rowdata=eqdata(i,:);
   else
@@ -237,7 +236,7 @@ filesy=sactable.corrfilesy;
 filesz=sactable.corrfilesz;
 
 figurehdls=[];
-for i=1:25
+for i=1:numevts
   newfig=figure();
   soleplot=1;
   xfile=filesx{i};
