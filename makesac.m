@@ -31,7 +31,7 @@ function sacname=makesac(evtdate,component)
 %
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 07/22/2020
+% Last Modified by Yuri Tamama, 09/02/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -49,7 +49,7 @@ evthrstr=datenum2str(evtdate.Hour,0);
 % Insert your own directory for:
 % Where you store miniseed files
 searchdir=fullfile(getenv(''),''); 
-% Where you store SAC files we may never need 
+% Where you sequester SAC files we may never need 
 % (e.g. individual SAC pieces, that may be created when converting 
 % 1 miniseed to SAC)
 rfdir=getenv('');
@@ -71,8 +71,13 @@ if exist(maybexist)==2
   sacname=maybexist;
   return
 elseif exist(maybexist2)==2
-  [status,cmdout]=system(sprintf('mv %s %s',maybexist2,sacsearchdir));
-  sacname=maybexist;  
+  if exist(sacsearchdir)~=0
+    [status,cmdout]=system(sprintf('mv %s %s',maybexist2,sacsearchdir));
+    sacname=maybexist;  
+  else
+    sacname=maybexist2;
+  end
+  return
 else
   % Convert .miniseed files to SAC
   % Check for both types of possible .miniseed names
@@ -120,21 +125,27 @@ else
       % Write to new SAC file
       sacname=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
       writesac(newdata,newhdr,sacname);
-      [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
-      sacname=fullfile(sacsearchdir,sacname);
+      if exist(sacsearchdir)~=0
+        [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
+        sacname=fullfile(sacsearchdir,sacname);
+      end
     else
       % Even if one file is made, that file may be missing data
       % Compare the SAC file name with one that should be made if 
       % the file were not missing data    
+      problemtime=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
       sacname=cmdcells{length(cmdcells)-1};
       sacnamemdl=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
       if strcmp(sacname,sacnamemdl)==0
-        disp('The SAC file has missing data. It is not usable.')
+        fprintf('The SAC file for %s in %s has missing data. It is not usable.',...
+          problemtime,component)
         sacname='';
         return        
       else
-        [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
-        sacname=fullfile(sacsearchdir,sacname);
+        if exist(sacsearchdir)~=0
+          [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
+          sacname=fullfile(sacsearchdir,sacname);
+        end
         return
       end
     end   
@@ -171,16 +182,20 @@ else
       % Write to new SAC file
       sacname=sprintf(sacnamefmt,component,evtyearstr,jdstr,evthrstr);
       writesac(newdata,newhdr,sacname);
-      [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
-      sacname=fullfile(sacsearchdir,sacname);
-      oldname='';
+      if exist(sacsearchdir)~=0
+        [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
+        sacname=fullfile(sacsearchdir,sacname);
+        oldname='';
+      end
     else
       % Even if one file is made, that file may be missing data
       oldname=cmdcells{length(cmdcells)-1}; 
       oldnamefmt='XX.S0001..HH%s.D.%s.%s.%s0000.SAC';
       oldnamemdl=sprintf(oldnamefmt,component,evtyearstr,jdstr,evthrstr);
+      problemtime=sprintf('%s/%s/%s %s:00:00',evtyearstr,evtmonstr,evtdaystr,evthrstr);
       if strcmp(oldname,oldnamemdl)==0
-        disp('The SAC file has missing data. It is not usable.')
+        fprintf('The SAC file for %s in %s has missing data. It is not usable.',...
+          problemtime,component)
         sacname='';
         return        
       end      
@@ -200,8 +215,10 @@ else
       end
       % Write to new SAC file
       writesac(seisdata,header,sacname); 
-      [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
-      sacname=fullfile(sacsearchdir,sacname);
+      if exist(sacsearchdir)~=0
+        [status,cmdout]=system(sprintf('mv %s %s',sacname,sacsearchdir));
+        sacname=fullfile(sacsearchdir,sacname);
+      end
     end
   end
 end
