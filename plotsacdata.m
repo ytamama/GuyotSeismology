@@ -90,7 +90,7 @@ function [seisplot,axeshdl,figname]=...
 % The lat-lon coordinates of Guyot Hall are from guyotphysics.m, in 
 % csdms-contrib/slepian_zero
 % 
-% Last Modified by Yuri Tamama, 08/03/2020
+% Last Modified by Yuri Tamama, 09/02/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -194,10 +194,10 @@ end
 % Strings necessary:
 % Frequencies
 if ~isempty(filterfreqs)
-  freqstr1=sprintf('%g',filterfreqs(1));
-  freqstr2=sprintf('%g',filterfreqs(2));
-  freqstr3=sprintf('%g',filterfreqs(3));
-  freqstr4=sprintf('%g',filterfreqs(4)); 
+  freqstr1=sprintf('%.2f',filterfreqs(1));
+  freqstr2=sprintf('%.2f',filterfreqs(2));
+  freqstr3=sprintf('%.2f',filterfreqs(3));
+  freqstr4=sprintf('%.2f',filterfreqs(4)); 
   % Periods
   pdstr1=sprintf('%.2f',1/filterfreqs(1));
   pdstr2=sprintf('%.2f',1/filterfreqs(2));
@@ -281,7 +281,7 @@ end
 
 % Plot data
 plotcount=0;
-compclrs={'-r';'-g';'-b'};
+plotclrs={'-r';'-g';'-b'};
 axeshdl=[];
 plotorder=sort(plotorder);
 for c=1:3
@@ -377,7 +377,8 @@ for c=1:3
         backazstr=strcat(sprintf(' Back Azimuth %.2f',backazimuth),...
           char(176));
         titlestr2=strcat(magstr,depstr,deltastr,deltastr2,backazstr);
-        titlestr3=sprintf('%s at %s (%s)',vallabel,staloc,stacode);
+        titlestr3=sprintf('%s at %s (%s)',vallabel,staloc,...
+          replace(stacode,'.',' '));
         if labelsw==1
           titlestr5=sprintf(...
             'Upper (%g km/s) and Lower (%g km/s) Surface Wave Speeds in Magenta',...
@@ -400,9 +401,10 @@ for c=1:3
           end
         end
       else
-        titlestr1=sprintf('Ground %s on %s JD %s %s:00:00',...
-          vallabel,yrstr,jdstr,hrstr);
-        titlestr2=sprintf('Recorded at %s (%s)',staloc,stacode);
+        titlestr1=sprintf('Ground %s on %s JD %s %s:%s:%s GMT',...
+          vallabel,yrstr,jdstr,hrstr,minstr,secstr);
+        titlestr2=sprintf('Recorded at %s (%s)',staloc,...
+          replace(stacode,'.',' '));
         if ~isempty(filterfreqs)
           title({titlestr1;titlestr2;titlestr4},'interpreter','tex')
         else
@@ -487,7 +489,7 @@ for c=1:3
   startlim=0;
   endlim=finaltime;
   % Plot the data!
-  plot(xrange,seisdata,compclrs{c})
+  plot(xrange,seisdata,plotclrs{c})
   % Axis limits
   xlim([startlim endlim])
   if soleplot==1
@@ -515,14 +517,23 @@ for c=1:3
   % that component
   nowaxes.YTickMode='manual';
   tickval=round(max(abs(seisdata)));
-  nowaxes.YTick=[-1*tickval; 0; tickval];
-  tickvalstr=sprintf('%d',tickval);
-  nowaxes.YTickLabelMode='manual';
-  nowaxes.YTickLabel={sprintf('-%s',tickvalstr);'0';tickvalstr};
+  % Add 99th percentile!
+  tickval2=round(prctile(abs(seisdata),99));
+  tickvals=[-1*tickval; -1*tickval2; 0; tickval2; tickval];
+  if length(unique(tickvals))~=length(tickvals)
+    keyboard
+  else
+    nowaxes.YTick=tickvals;
+    tickvalstr=sprintf('%d',tickval);
+    tickvalstr2=sprintf('%d',tickval2);
+    nowaxes.YTickLabelMode='manual';
+    nowaxes.YTickLabel={sprintf('-%s',tickvalstr);sprintf('-%s',tickvalstr2);...
+      '0';tickvalstr2;tickvalstr};
+  end
   % Add to plot count
   plotcount=plotcount+1;
+  keyboard
 end
-
 
 % Save plot
 if saveplot==1
@@ -579,12 +590,13 @@ if saveplot==1
     end
   else
     if ~isempty(filterfreqs)
-      figname=sprintf('%s.%s.%s.%s.%ss_%s%s%s%s.eps',stacode,...
-        yrstr,jdstr,lower(vallabelmini),num2str(round(finaltime)),...
-        freqstr1,freqstr2,freqstr3,freqstr4);
+      figname=sprintf('%s.%s.%s.%s%s%s.%s.%ss_%s%s%s%s.eps',stacode,...
+        yrstr,jdstr,hrstr,minstr,secstr,lower(vallabelmini),...
+        num2str(round(finaltime)),freqstr1,freqstr2,freqstr3,freqstr4);
     else
-      figname=sprintf('%s.%s.%s.%s.%ss.eps',stacode,...
-        yrstr,jdstr,lower(vallabelmini),num2str(round(finaltime)));
+      figname=sprintf('%s.%s.%s.%s%s%s.%s.%ss.eps',stacode,...
+        yrstr,jdstr,hrstr,minstr,secstr,lower(vallabelmini),...
+        num2str(round(finaltime)));
     end
   end
   figname2=figdisp(figname,[],[],1,[],'epstopdf');
