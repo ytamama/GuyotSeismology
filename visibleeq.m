@@ -1,4 +1,4 @@
-function figurehdl=visibleeq(csvfile,measval,frequency,magrange,...
+function figurehdl=visibleeq(csvfile,measval,frequency,magrange,cmaptype,...
   saveplot,savedir,customtitle,customfigname)
 %
 % Function to plot a magnitude vs. epicentral scatterplot of earthquakes 
@@ -22,6 +22,16 @@ function figurehdl=visibleeq(csvfile,measval,frequency,magrange,...
 %            Default: [], for plotting all magnitudes
 % 
 %            Note: The magnitudes are inclusive on both ends!
+% cmaptype : We can have two types of colormaps 
+%            1 - One with depths listed by every 50 km 
+%            2 - One with depths categorized by "shallow," "intermediate,"
+%                or "deep" (from "The Nature of Deep-Focus Earthquakes"
+%                by Frohlich, 1989), where:
+%                shallow: < 70 km
+%                intermediate: [70, 300] km
+%                deep: > 300 km
+%            In either option, each category has its own color
+%            
 % saveplot : Do we wish to save our plot?
 %            0 - No (default)
 %            1 - Yes
@@ -39,9 +49,11 @@ function figurehdl=visibleeq(csvfile,measval,frequency,magrange,...
 % Use of colormap, including how to adjust for the number of colors in 
 % the colormap, from MATLAB help forums
 %
-% Last Modified by Yuri Tamama, 08/03/2020
+% Frohlich, C. "The Nature of Deep-Focus Earthquakes," 1989
+%
+% Last Modified by Yuri Tamama, 09/03/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Specify directory to get data - insert your own!
+% Specify important directory to obtain seismic data
 datadir=getenv('');
 
 % Set default values
@@ -75,21 +87,36 @@ alldata=vertcat(alldata,data19);
 % Create a magnitude vs. distance earthquake visibility plot
 figurehdl=figure();
 % Set up a color bar for depth
-cmap=colormap(jet(14));
-cbar=colorbar;
-cbar.Direction='reverse';
-cbar.TicksMode='manual';
-cbar.Ticks=[0:1/14:1];
-cbar.TickLabelsMode='manual';
-cbar.TickLabels={'0';'50';'100';'150';'200';'250';'300';'350';'400';...
-'450';'500';'550';'600';'650';'700'};
+if cmaptype==1
+  cmap=colormap(jet(14));
+  cbar=colorbar;
+  cbar.Direction='reverse';
+  cbar.TicksMode='manual';
+  cbar.Ticks=[0:1/14:1];
+  cbar.TickLabelsMode='manual';
+  cbar.TickLabels={'0';'50';'100';'150';'200';'250';'300';'350';'400';...
+    '450';'500';'550';'600';'650';'700'};
+else
+  cmapmat=zeros(70,3);
+  cmapmat(1:7,1)=1;
+  cmapmat(8:30,1)=.6;
+  cmapmat(8:30,3)=.8;
+  cmapmat(31:70,3)=1;
+  cmap=colormap(cmapmat);
+  cbar=colorbar;
+  cbar.Direction='reverse';
+  cbar.TicksMode='manual';
+  cbar.Ticks=[0 1/10 3/7 1];
+  cbar.TickLabelsMode='manual';
+  cbar.TickLabels={'0';'70';'300';'700'};
+end
 cbar.Label.String='Depth (km)';
 cbar.Location='eastoutside';
 cbar.Label.Rotation=270;
 cbar.Label.Position=(cbar.Label.Position).*[5/4 1 1];
 % Plot each point!
 hold on
-% Counter variables to set up the legend later
+% "Tracking" variables to set up the legend later
 firstfilled=0;
 firstunfilled=0;
 filledfirst=0;
@@ -132,7 +159,17 @@ for i=1:length(eqvisible)
   plotmag=(magnitude+2)*15;
   % Plot!
   plotpoint=plot(distdeg,plotmag,'o');
-  plotcolor=pscolorcode(depth,2); 
+  if cmaptype==1
+    plotcolor=pscolorcode(depth,2); 
+  else
+    if depth<70
+      plotcolor=[1 0 0];
+    elseif depth<=300
+      plotcolor=[.6 0 .8];
+    else
+      plotcolor=[0 0 1];
+    end
+  end
   plotpoint.LineWidth=1.5;
   plotpoint.MarkerEdgeColor=plotcolor;
   plotpoint.MarkerSize=8;
@@ -232,7 +269,7 @@ else
   magstr='allM';
   titlestr1=sprintf('Earthquake %s Signals Detected',vallabel);
 end
-titlestr2='by the Meridian Compact PH1 0248 Seismometer';
+titlestr2='by the Meridian Compact PH1 0248 Seismometer (PP S0001)';
 titlestr3='Stationed at Guyot Hall, Princeton University';
 % Frequency and period
 freqstr1=sprintf('%g',frequency(1));
@@ -269,8 +306,8 @@ if saveplot==1
   if ~isempty(customfigname)
     figname=customfigname;
   else
-    figname=sprintf('visibleearthquakeschart.%s.%s.%s%s%s%s.eps',...
-      vallabelmini,magstr,freqstr1,freqstr2,freqstr3,freqstr4);
+    figname=sprintf('visibleeqsplot.cmap%d.%s.%s.%s%s%s%s.eps',...
+      cmaptype,vallabelmini,magstr,freqstr1,freqstr2,freqstr3,freqstr4);
   end
   figname2=figdisp(figname,[],[],1,[],'epstopdf');
   if ~isempty(savedir)
