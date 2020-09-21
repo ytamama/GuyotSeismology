@@ -129,13 +129,13 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Important directories - insert your own!
-mcdir=getenv('MC');
+mcdir=getenv('');
 
 % Set Default Values
 defval('timezone','UTC')
 defval('saveplot',1);
 % Insert your own directory!
-defval('savedir',fullfile(mcdir,'/rmsplots'));
+defval('savedir','');
 defval('addlegend',1);
 defval('xyr',0);
 defval('adjustplot',0);
@@ -207,11 +207,12 @@ valunits={'nm';'nm/s';'nm/s^2'};
 vallabels={'Displacement';'Velocity';'Acceleration'};
 valunit=valunits{measval+1};
 vallabel=vallabels{measval+1};
-if strcmp(savedir,fullfile(mcdir,'/rmsplots'))
+% Insert your own directory!
+if strcmp(savedir,fullfile(mcdir,''''))
   if measval==0
-    savedir=fullfile(savedir,lower(vallabel(1:4)));
+    savedir=fullfile('');
   else
-    savedir=fullfile(savedir,lower(vallabel(1:3)));
+    savedir=fullfile('');
   end
 end
 % Figure out intervals
