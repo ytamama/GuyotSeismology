@@ -13,7 +13,7 @@ function cbmotion(plotcb,numdim,maybehrs,measval,frequency,saveplot,...
 % blast signal (e.g. 11 UTC : 11 - 11:59:59 UTC). Because the known 
 % campus blasts have highest signal amplitude in X, the program then 
 % looks for the maximum signal in the X component of that inputted
-% hour. Then, the program collects a 30 second interval surrounding that
+% hour. Then, the program collects a 6 second interval surrounding that
 % time in all components, and plots the seismometer's motion in the
 % X-Y, Y-Z, and X-Z planes. Note that X is East-West, Y is North-South, 
 % and Z is vertical. 
