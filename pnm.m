@@ -97,18 +97,21 @@ title('Peterson (1993) Noise Model')
 if xval==0
   xlabel('Frequency (Hz)')
   ax.XLim=[1e-5 10];
+  plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
+    'Location','southwest');
 else
   xlabel('Period (s)')
   ax.XLim=[0.1 10^5];
+  plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
+    'Location','northwest');
 end
 ylabel(sprintf('Power Spectral Density %s',yunits{measval+1}))
-plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
-  'Location','northwest');
 % Adjust plot size
 figurehdl.Units='Normalized';
-figurehdl.OuterPosition(3)=.9;
+figurehdl.OuterPosition(3)=.75;
 figurehdl.OuterPosition(4)=.8;
-shrink(ax,1,.95) 
+shrink(ax,1,1.25) 
+hold off
 
 if saveplot==1
   yunit={'disp';'vel';'acc'};
