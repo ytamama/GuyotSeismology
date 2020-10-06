@@ -89,7 +89,6 @@ lnplot=plot(lnx,nlnm);
 hold on
 hnplot=plot(hnx,nhnm);
 ax=gca;
-ax.XLim=[0.1 10^5];
 ax.YLim=[-200 -60];
 ax.XScale='log';
 % Title
@@ -97,8 +96,10 @@ title('Peterson (1993) Noise Model')
 % Axis labels and legend
 if xval==0
   xlabel('Frequency (Hz)')
+  ax.XLim=[1e-5 10];
 else
   xlabel('Period (s)')
+  ax.XLim=[0.1 10^5];
 end
 ylabel(sprintf('Power Spectral Density %s',yunits{measval+1}))
 plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
