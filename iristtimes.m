@@ -17,8 +17,9 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 % evdep : The depth of the event, in km. Enter -1 if unknown or is an 
 %         "airquake".
 % evdistunit : Enter the units of the distance entered in evlalodist, 
-%              if using that option. Alternatively, enter an empty string
-%              if entering latitude and longitude in evlalodist.
+%              if using that option.
+% 
+%              Example) Empty string, for latitude and longitude
 %              Example) 'degrees', 'deg' for degrees
 %              Example) 'kilometers', 'kilo', 'km' for kilometers
 % stalalo : A vector containing the latitude and longitude, in that 
@@ -29,30 +30,30 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 % 
 % OUTPUTS
 % ttimetbl : A table, showing the outputs of the IRIS traveltime query
+%            From left column to right: phase name, distance from event
+%            to station (degrees), travel time (seconds)
 % 
 % References:
 % Location of Guyot Hall from csdms-contrib/slepian_zero
 % defval.m from csdms-contrib/slepian_alpha
-%
-% Uses IRIS's traveltime web service
 % 
-% Last Modified by Yuri Tamama, 07/28/2020
+% Last Modified by Yuri Tamama, 10/06/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 defval('stalalo',[40.34585 -74.65475]);
 
 % Construct the query with the locations/distance
 irisquery='https://service.iris.edu/irisws/traveltime/1/query?';
-evdepstr=sprintf('evdepth=%.3f',evdep);
+evdepstr=sprintf('evdepth=%g',evdep);
 if length(evlalodist)==2
-  evlocstr=sprintf('evloc=[%.3f,%.3f]',evlalodist(1),evlalodist(2));
-  stalocstr=sprintf('staloc=[%.3f,%.3f]',stalalo(1),stalalo(2));
+  evlocstr=sprintf('evloc=[%g,%g]',evlalodist(1),evlalodist(2));
+  stalocstr=sprintf('staloc=[%g,%g]',stalalo(1),stalalo(2));
   irisquery=strcat(irisquery,stalocstr,'&',evlocstr,'&',evdepstr);
 else
   if strcmpi(evdistunit(1),'d')==1
-    evlocstr=sprintf('distdeg=%.3f',evlalodist(1));
+    evlocstr=sprintf('distdeg=%g',evlalodist(1));
   else
-    evlocstr=sprintf('distkm=%.3f',evlalodist(1));
+    evlocstr=sprintf('distkm=%g',evlalodist(1));
   end
   irisquery=strcat(irisquery,evlocstr,'&',evdepstr);
 end
@@ -60,33 +61,37 @@ end
 irisquery=strcat(irisquery,'&mintimeonly=true&noheader=true');
 
 % Query to submit via the command line
-querycmd=sprintf('wget "%s" -O- -q | awk ''{print $2,$3,$4}''',...
+querycmd=sprintf('wget "%s" -O- -q | awk ''{print $1,$2,$3,$4}''',...
   irisquery);
 [status,cmdout]=system(querycmd);
 outputs=strsplit(cmdout);
-% phases: indices 2, 5, 8, 11...
-% times: indices 3, 6, 9,...
+% phases: 3, 7, 11, 15...
+% distances: Index 5
+% times: 4, 8, 12, 16...
+distdeg=str2double(outputs{5});
 phases={};
 ttimes=[];
 for i=1:length(outputs)
-  if i==2
+  if i==3
     phases=vertcat(phases,outputs{i});
-    outputcount=1;
+    nextind=i+4;
   end 
-  if mod(i,3)==0
-    ttimes=[ttimes;str2num(outputs{i})];
+  if mod(i,4)==0
+    ttimes=[ttimes;str2double(outputs{i})];
   end
-  if i>2
-    if outputcount==3
+  if i>3
+    if i==nextind
       phases=vertcat(phases,outputs{i});
-      outputcount=1;
-    else
-      outputcount=outputcount+1;
+      nextind=i+4;
     end
-  end
+  end  
 end
+distdegs=ones(length(phases),1)*distdeg;
+
 
 % Create the table
-% Column order: phase name, then travel time
-ttimetbl=table(phases,ttimes);
+% Column order: phase name, distance, travel time
+ttimetbl=table(phases,distdegs,ttimes);
+ttimetbl=sortrows(ttimetbl,3,'ascend');
+
 

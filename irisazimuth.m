@@ -12,24 +12,23 @@ function [backazimuth,azimuth,distdeg,distmtr]=irisazimuth(evlalo,stalalo)
 %           the latitude, longitude coordinates of station and event
 %           Default value: Location of Guyot Hall, Princeton University at 
 %                          (latitude, longitude)=(40.34585, -74.65475)
+%
+% OUTPUTS
+% backazimuth : The back azimuth, in degrees
+% azimuth : The azimuth, in degrees
 % distdeg : The Great Circle Arc distance, computed in degrees, between
 %           the event and station
 % distmtr : The Great Circle Arc distance, computed in meters, between 
 %           the event and station
-%
-% OUTPUTS
-% ttimetbl : A table, showing the outputs of the IRIS traveltime query
-% ttimefile : The name of the text file, in the current working directory,
-%             containing the contents of ttimetbl.
 % 
 % References:
 % Location of Guyot Hall from csdms-contrib/slepian_zero
 % defval.m from csdms-contrib/slepian_alpha
-%
 % Uses IRIS's distaz web service
 % 
-% Last Modified by Yuri Tamama, 07/15/2020
+% Last Modified by Yuri Tamama, 10/06/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set default values
 defval('stalalo',[40.34585 -74.65475]);
 
 % Construct the query with the locations
