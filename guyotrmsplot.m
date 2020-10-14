@@ -101,6 +101,9 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %                       7 - Hail accumulation (# hits)
 %                       Enter one of these values, or leave empty if we 
 %                       don't want to plot weather data
+%
+%            NOTE: As of 10/14/2020, this functionality is only available
+%                  for plotting hourly RMS ground motion data. 
 %            
 % adjustplot : Do we want to adjust the cosmetics of our plot by hand, 
 %              at the end?
