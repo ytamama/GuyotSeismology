@@ -39,12 +39,12 @@ function correctedsac=correctsac(sacfiles,measval,frequency,respfile)
 % Code to convert from a .miniseed file to a .SAC file and
 % apply instrument response correction from
 % mcms2mat.m, in csdms-contrib/slepian_oscar
-% 
+% Uses readsac.m, in csdms-contrib/slepian_oscar
 % Uses jul2dat.m, in csdms-contrib/slepian_oscar
 % 
 % Uses IRIS's resp web service to retrive response files, if necessary
 % 
-% Last Modified by Yuri Tamama, 07/22/2020
+% Last Modified by Yuri Tamama, 10/14/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -144,8 +144,10 @@ correctedsac=sprintf(corrfmt,netwkname,staname,locname,...
   vallabelmini,channel,yearstr,jdstr,hrstr,minstr,secstr,freqstr1,...
   freqstr2,freqstr3,freqstr4);
 
-% Taper buffer start and end (see mcevttimes.m)
-tapertime=480;    
+% Taper buffer start and end 
+% Assign so that cutting 5% from either side of the merged file gets us
+% 1 hour of data, as intended
+tapertime=200; 
 bufferstart=3600-tapertime;
 bufferend=7199.99+tapertime;
       
