@@ -30,12 +30,12 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %             If plotting 'day' or 'hr' (rmstype=0 or 1), input a 
 %             datetime vector in local time. 
 %             If plotting 'qrt' (rmstype=2), input a number from 0-23 
-%             signifying an hour 
+%             signifying an hour (in UTC time)
 % finaltime : At what time do we end our time series?
 %             If plotting 'day' or 'hr' (rmstype=0 or 1), input a 
 %             datetime vector in local time. 
 %             If plotting 'qrt' (rmstype=2), input a number from 0-23 
-%             signifying an hour 
+%             signifying an hour (in UTC time)
 % timezone : The MATLAB time zone of the times plotted
 %            Default: 'UTC'
 % tzlabel : The label characterizing the time zone of the times plotted
