@@ -1,7 +1,7 @@
 function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
-  measval,rmstype,yrsplotted,starttime,finaltime,jds,timezone,tzlabel,prclimit,...
-  saveplot,savedir,addlegend,frequency,xyh,adjustplot,vertlines,...
-  vertlinelabs,customtitle,customxlabel,customfigname,lineclrs,...
+  measval,rmstype,yrsplotted,starttime,finaltime,timezone,tzlabel,...
+  rmoutlier,saveplot,savedir,addlegend,frequency,xyh,wthrinfo,adjustplot,...
+  vertlines,vertlinelabs,customtitle,customxlabel,customfigname,lineclrs,...
   linewdh,linestyls)
 %
 % Function to plot the RMS displacement, velocity, or acceleration 
@@ -36,32 +36,72 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %             datetime vector in local time. 
 %             If plotting 'qrt' (rmstype=2), input a number from 0-23 
 %             signifying an hour 
-% jds : What is the range of Julian Days being plotted?
-%       Example: 1:10
 % timezone : The MATLAB time zone of the times plotted
 %            Default: 'UTC'
 % tzlabel : The label characterizing the time zone of the times plotted
-% prclimit : The threshold, given as a percentile, for the values plotted
-%            when they were generated in the csv-producing codes
-%            (see guyotrmsseisday.m, guyotrmsseishr.m, guyotrmssseisqrt.m 
-%            Enter the same threshold number here as was used in those 
-%            programs)
-%            Default: 100
+% rmoutlier :  How we removed the outliers for the values plotted
+%              when they were generated in the csv-producing codes. 
+%              0 - Used a percentage limit. For every hour of seismic
+%                  data, we removed signals that are at or above this
+%                  percentile. If a percentage limit was used, enter a two 
+%                  number vector, with 0 as the first element and the 
+%                  percentile limit as the second.
+%              1 - Removed outliers that are more than a certain number of
+%                  median standard deviations (MAD) away from the median. 
+%                  Enter a 2 number vector, with 1 as the first element 
+%                  and the # of MADs as the second, like this:
+%                  [1 3] - remove signals at least 3 MADs away from the
+%                          median for every hour 
+% 
+%              Input an empty array if we didn't cut out any signals
+%              (default)
+%
 % saveplot : Do we wish to save our plot?
 %            0 : No
 %            1 : Yes (Default)
 % savedir : Where do we save our plot? Specify the directory as a string!
-%           Enter as an empty string if not saving or using the default.
+%           Default: current working directory
 % addlegend : Add a legend in the plot? Yes or no?
 %             0 : No 
 %             1 : Yes (Default)
-% frequency : If plotting seismic data, enter the frequencies at which 
-%             the data were filtered to generate the RMS values.
-%             Enter an empty vector if not plotting seismic RMS values
-% xyh : If plotting seismic data, do we want to combine the X (East) 
-%       and Y (North) RMS values into one horizontal value?
-%       0 : No (Default)
-%       1 : Yes 
+% frequency : Enter the frequencies at which the seismic data were 
+%             filtered to generate the RMS values.
+% xyh : Do we want to combine the X (East) and Y (North) RMS values 
+%       into one horizontal (H) value, and if so, how? Enter as a 2 element
+%       vector with the following elements:
+%       [xyorh, xyhhow] where
+%       xyorh : Do we want to plot horizontal values? 
+%               0 : No (Default)
+%               1 : Yes 
+%       xyhhow : How do we want to get horizontal values?
+%                0 : By using the H column in the CSV file
+%                    (as of October 10, 2020, for guyotrmsseishr.m)
+%                1 : By combining the X and Y RMS values
+%       Leave empty if plotting X and Y separately
+% 
+% wthrinfo : Do we want to superimpose a plot of weather data on a subplot
+%            of ground motion data? Enter a cell array with the necessary
+%            info, like so:
+%            {plotwthr; wthrcsv; wthrmeas} where
+%            
+%            plotwthr : Do we want to superimpose weather data?
+%                       0 - No (Default)
+%                       1 - Yes
+%            wthrcsv : CSV file containing the RMS values of a particular
+%                      weather phenomenon, averaged over the same time 
+%                      period as our ground motion values. Leave empty
+%                      if we don't want to plot weather data
+%            wthrmeas : What are we plotting?
+%                       1 - Mean wind direction (degrees)
+%                       2 - Mean wind speed (meters/s; default)
+%                       3 - Air temperature (celsius)
+%                       4 - Relative humidity (percent)
+%                       5 - Air pressure (bars)
+%                       6 - Rain accumulation (mm)
+%                       7 - Hail accumulation (# hits)
+%                       Enter one of these values, or leave empty if we 
+%                       don't want to plot weather data
+%            
 % adjustplot : Do we want to adjust the cosmetics of our plot by hand, 
 %              at the end?
 %              0 : No (Default)
@@ -96,7 +136,7 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %           of ascending year. The vector should be of length 4, one 
 %           index per year. If we are omitting data for one year,
 %           then the corresponding value in linewdh should be 0.
-%           Default: [1 1 1 1.25]
+%           Default: [1 1 1 1]
 % 
 % linestyls : A cell array containing the styles for the line plots, in 
 %            order of ascending year. The array should be of length 4, 
@@ -125,42 +165,52 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 % References
 % Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 09/18/2020
+% Last Modified by Yuri Tamama, 10/14/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Important directories - insert your own!
-mcdir=getenv('');
-
 % Set Default Values
 defval('timezone','UTC')
-defval('saveplot',1);
-% Insert your own directory!
-defval('savedir','');
-defval('addlegend',1);
-defval('xyr',0);
-defval('adjustplot',0);
-defval('vertlines',[]);
-defval('vertlinelabs',{});
-defval('lineclrs',{[0 0.7 0.9];[0 0.85 0];[1 .65 0];[1 0 0.25]});
-defval('linewdh',[1 1 1 1.25]);
+defval('saveplot',1)
+defval('savedir',pwd)
+defval('addlegend',1)
+% XYH:
+if isempty(xyh)
+  xyorh=0;
+else
+  if length(xyh)>1
+    xyhhow=xyh(2);
+  end
+end
+% Weather data?
+defval('wthrinfo',[])
+if isempty(wthrinfo)
+  plotwthr=0;
+else
+  plotwthr=wthrinfo{1};
+end
+if plotwthr==1
+  wthrcsv=wthrinfo{2};
+  wthrmeas=wthrinfo{3};
+end
+defval('adjustplot',0)
+defval('vertlines',[])
+defval('vertlinelabs',{})
+defval('lineclrs',{[0 0.7 0.9];[0 0.85 0];[1 .65 0];[1 0 0.25]})
+defval('linewdh',[1 1 1 1])
 defval('linestyls',{'-';'-';'-';'-'})
 defval('customtitle','')
 defval('customxlabel','')
 defval('customfigname','')
-defval('prclimit',100)
 
 % Check Inputs for Compatibility
 if (rmstype==2) && (~isempty(vertlines))
   fprintf('These settings are not compatible. Exiting function.\n')
   return
 end
-if (measval>2) && (~isempty(frequency) || xyh>0)
-  fprintf('These settings are not compatible. Exiting function.\n')
-  return
-end   
+
 
 % Display plotting settings to the user
-if xyh==0
+if xyorh==0
   fprintf('We will plot the horizontal components separately.\n')
 else
   fprintf('We will combine the horizontal components.\n')
@@ -207,14 +257,6 @@ valunits={'nm';'nm/s';'nm/s^2'};
 vallabels={'Displacement';'Velocity';'Acceleration'};
 valunit=valunits{measval+1};
 vallabel=vallabels{measval+1};
-% Insert your own directory!
-if strcmp(savedir,fullfile(mcdir,''''))
-  if measval==0
-    savedir=fullfile('');
-  else
-    savedir=fullfile('');
-  end
-end
 % Figure out intervals
 if rmstype==0
   rmsstr='Daily';
@@ -245,6 +287,11 @@ rmstcell=cell(4,1);
 rmszcell=cell(4,1);
 rmsycell=cell(4,1);
 rmsxcell=cell(4,1);
+if xyorh==0
+  rmshcell={};
+else  
+  rmshcell=cell(4,1);
+end  
 for i=1:4
   if ~isempty(csvfiles{i})
     data=readtable(csvfiles{i},'Delimiter',',');
@@ -269,6 +316,23 @@ for i=1:4
     yvec=data.rmsy;
     yvec(yvec==-1)=NaN;
     rmsycell{i}=yvec;
+    if xyorh==1
+      if xyhhow==0
+        hvec=data.rmsh;
+      else
+        xvectemp=data.rmsx;
+        yvectemp=data.rmsy;
+        % Only 'discard' where RMS values could not be found for both
+        % X and Y
+        xvectemp(xvectemp==-1 && yvectemp==-1)=NaN;
+        xvectemp(xvectemp==-1)=0;
+        yvectemp(xvectemp==-1 && yvectemp==-1)=NaN;
+        yvectemp(yvectemp==-1)=0;
+        hvec=sqrt(xvectemp.^2+yvectemp.^2);
+      end
+      hvec(hvec==-1)=NaN;
+      rmshcell{i}=hvec;
+    end  
   end
 end   
 numtimes=length(timevec);
@@ -281,14 +345,19 @@ numtimes=length(timevec);
 % themselves, set it up such that the weekdays/weekends are aligned 
 % in the first place. 
 if rmstype<2 && length(yrsplotted)>1
-  [timevector,rmszmat,rmsymat,rmsxmat]=alignrmstimes(...
-    rmstcell,yrsplotted,rmszcell,rmsycell,rmsxcell);
+  [timevector,rmszmat,rmsymat,rmsxmat,rmshmat]=alignrmstimes(...
+    rmstcell,yrsplotted,rmszcell,rmsycell,rmsxcell,rmshcell);
 
 % If we don't need to align our times, convert our data to matrix form
 else
   rmszmat=zeros(numtimes,4);
   rmsymat=zeros(numtimes,4);
   rmsxmat=zeros(numtimes,4);
+  if xyorh==1
+    rmshmat=zeros(numtimes,4);
+  else
+    rmshmat=[];
+  end  
   for i=1:4
     if ~isempty(csvfiles{i})  
       % Store data in matrices! We only have one year anyways
@@ -302,6 +371,23 @@ else
       yvec=data.rmsy;
       yvec(yvec==-1)=NaN;
       rmsymat(:,i)=yvec;
+      if xyorh==1
+        if xyhhow==0
+          hvec=data.rmsh;
+        else
+          xvectemp=data.rmsx;
+          yvectemp=data.rmsy;
+          % Only 'discard' where RMS values could not be found for both
+          % X and Y
+          xvectemp(xvectemp==-1 && yvectemp==-1)=NaN;
+          xvectemp(xvectemp==-1)=0;
+          yvectemp(xvectemp==-1 && yvectemp==-1)=NaN;
+          yvectemp(yvectemp==-1)=0;
+          hvec=sqrt(xvectemp.^2+yvectemp.^2);
+        end
+        hvec(hvec==-1)=NaN;
+        rmshmat(:,i)=hvec;
+      end 
     end    
   end
   timevector=timevec;
@@ -309,26 +395,17 @@ end
 
 % Narrow down the RMS data to the desired time-period
 % Inclusive of start and end time
+% if ~isempty(starttime) && ~isempty(finaltime)
 if rmstype<2
   timevector.TimeZone=timezone;
-  [timevector,rmszmat2,rmsymat2,rmsxmat2]=cutrmsdata(timevector,...
-    rmszmat,rmsymat,rmsxmat,starttime,finaltime,timezone,rmstype);
+  [timevector,rmszmat2,rmsymat2,rmsxmat2,rmshmat2]=cutrmsdata(timevector,...
+    rmszmat,rmsymat,rmsxmat,rmshmat,starttime,finaltime,timezone,rmstype);
 else
   timevector.TimeZone='UTC';
-  [timevector,rmszmat2,rmsymat2,rmsxmat2]=cutrmsdata(timevector,...
-    rmszmat,rmsymat,rmsxmat,starttime,finaltime,'UTC',rmstype);
+  [timevector,rmszmat2,rmsymat2,rmsxmat2,rmshmat2]=cutrmsdata(timevector,...
+    rmszmat,rmsymat,rmsxmat,rmshmat,starttime,finaltime,'UTC',rmstype);
 end
 numtimes2=length(timevector);
-
-% Combine the horizontal components, if requested
-rmshmat2=zeros(numtimes2,4);
-for i=1:4
-  if ~isempty(csvfiles{i})
-    xvec=rmsxmat2(:,i);
-    yvec=rmsymat2(:,i);
-    rmshmat2(:,i)=sqrt(xvec.^2+yvec.^2);
-  end
-end
 
 % Now: convert timevector to local time
 timevector.TimeZone=timezone;
@@ -385,7 +462,7 @@ end
 
 % Figure out vertical axis limits
 allyrs=[2017 2018 2019 2020];
-if xyh==0
+if xyorh==0
   allx=[];
   ally=[];
   allz=[];
@@ -437,7 +514,7 @@ end
 dataminz=dataminz/plotscale;
 datamaxz=datamaxz/plotscale;
 allz=allz/plotscale;
-if xyh==0
+if xyorh==0
   dataminx=dataminx/plotscale;
   dataminy=dataminy/plotscale;
   datamaxx=datamaxx/plotscale;
@@ -461,6 +538,9 @@ else
   subplot(2,1,1)
 end
 plotted1st=0;
+if plotwthr==1
+  yyaxis left
+end
 for i=1:4
   if ismember(allyrs(i),yrsplotted)
     plotdata=rmszmat2(:,i);
@@ -480,7 +560,7 @@ for i=1:4
   end
 end
 ylim([dataminz datamaxz]);
-xlim([timevector(1) timevector(length(timevector))])
+xlim([timevector(1) timevector(length(timevector))]) 
 
 % Plot vertical lines, if applicable
 if ~isempty(vertlines)
@@ -527,30 +607,34 @@ elseif prc100<100
 else
   prc100=round(prc100);
 end
+% keyboard
 if isempty(nowaxes.YTick) || isempty(nowaxes.YTickLabel)
   nowaxes.YTick=unique([prc0; prc50; prc100]);
   nowaxes.YTickLabel={num2str(prc0);num2str(prc50);num2str(prc100)};
 end
 %
 ylabel(sprintf('Z %s',valunit))   
+if plotwthr==1
+  yyaxis right
+  [~,titlestrw,~]=addvairms(wthrcsv,wthrmeas,starttime,finaltime);  
+end  
 
 % Title
-if isempty(customtitle)
-  if isempty(prclimit) || prclimit==100
-    if rmstype<2
-      titlestr1=sprintf('RMS %s %s',rmsstr,vallabel);
-    else
-      titlestr1=sprintf('RMS %s %s',vallabel,rmsstr);
-    end
+if length(rmoutlier)>1
+  if rmoutlier(1)==0
+    titlestrrm=sprintf(' (Bottom %g%% per Hour)',rmoutlier(2));
   else
-    if rmstype<2
-      titlestr1=sprintf('RMS %s %s (Bottom %g%% per Hour)',...
-        rmsstr,vallabel,prclimit);
-    else
-      titlestr1=sprintf('RMS %s %s (Bottom %g%% per Hour)',...
-        vallabel,rmsstr,prclimit);
-    end
-  end  
+    titlestrrm=sprintf(' (No signals +/- %.2f MAD from the median)',rmoutlier(2));
+  end
+else
+  titlestrrm='';
+end
+if isempty(customtitle)
+  if rmstype<2
+    titlestr1=sprintf('RMS %s %s %s',rmsstr,vallabel,titlestrrm);
+  else
+    titlestr1=sprintf('RMS %s %s %s',vallabel,rmsstr,titlestrrm);
+  end
   titlestr2='Recorded at Guyot Hall, Princeton University (PP S0001)';
 
   % Frequencies
@@ -563,18 +647,40 @@ if isempty(customtitle)
   if xyh==0
     if ~isempty(vertlines) && ~isempty(vertlinelabs)
       titlestrv='Vertical Lines Labeled Chronologically';
-      title({titlestr1;titlestr2;titlestr3;titlestrv},'interpreter','tex')
+      if plotwthr==0
+        title({titlestr1;titlestr2;titlestr3;titlestrv},'interpreter',...
+          'tex')
+      else
+        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestrv},...
+          'interpreter','tex')
+      end    
     else
-      title({titlestr1;titlestr2;titlestr3},'interpreter','tex')
+      if plotwthr==0  
+        title({titlestr1;titlestr2;titlestr3},'interpreter','tex')
+      else
+        title({titlestr1;titlestrw;titlestr2;titlestr3},'interpreter',...
+          'tex')
+      end
     end
   else
     titlestr4='H = Horizontal; Z = Vertical';
     if ~isempty(vertlines) && ~isempty(vertlinelabs)
       titlestrv='Vertical Lines Labeled Chronologically';
-      title({titlestr1;titlestr2;titlestr3;titlestr4;titlestrv},...
-        'interpreter','tex')
+      if plotwthr==0
+        title({titlestr1;titlestr2;titlestr3;titlestr4;titlestrv},...
+          'interpreter','tex')
+      else
+        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestr4;...
+          titlestrv},'interpreter','tex')
+      end
     else
-      title({titlestr1;titlestr2;titlestr3;titlestr4},'interpreter','tex')
+      if plotwthr==0
+        title({titlestr1;titlestr2;titlestr3;titlestr4},'interpreter',...
+          'tex')
+      else
+        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestr4},...
+          'interpreter','tex')
+      end
     end
   end
 else
@@ -584,10 +690,13 @@ end
 shrink(nowaxes,0.95,.95) 
 %
 % Plot horizontal components
-if xyh==0
+if xyorh==0
   % Y Component
   subplot(3,1,2)
   plotted1st=0;
+  if plotwthr==1
+    yyaxis left
+  end
   for i=1:4
     if ismember(allyrs(i),yrsplotted)
       plotdata=rmsymat2(:,i);
@@ -660,14 +769,21 @@ if xyh==0
   %
   ylabel({sprintf('%s',vallabel);sprintf('Y (N) %s',valunit)})
   shrink(nowaxes,0.95,.95) 
+  if plotwthr==1
+    yyaxis right
+    addvairms(wthrcsv,wthrmeas,starttime,finaltime)
+  end
 end
 %
 % X (or H) Component
 legendstrs={};
 % X
-if xyh==0
+if xyorh==0
   subplot(3,1,3)
   plotted1st=0;
+  if plotwthr==1
+    yyaxis left
+  end
   for i=1:4
     if ismember(allyrs(i),yrsplotted)
       plotdata=rmsxmat2(:,i);
@@ -693,6 +809,9 @@ if xyh==0
 else
   subplot(2,1,2)
   plotted1st=0;
+  if plotwthr==1
+    yyaxis left
+  end
   for i=1:4
     if ismember(allyrs(i),yrsplotted)
       plotdata=rmshmat2(:,i);
@@ -716,19 +835,28 @@ else
   datamax=datamaxh;
 end    
 xlim([timevector(1) timevector(length(timevector))])
+if plotwthr==1
+  yyaxis right
+  [wthrlgd,~,wthrname]=addvairms(wthrcsv,wthrmeas,starttime,finaltime);  
+  legendstrs=vertcat(legendstrs,wthrlgd);
+else
+  wthrname='';
+end
 
 % Plot vertical lines, if applicable
 if ~isempty(vertlines)
   for i=1:length(vertlines)
     if strcmp(vertstyls{i},'--') || strcmp(vertstyls{i},':')
-      line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
+      vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
         'Color',[.55 .55 .55],'LineWidth',1.5);
     else
-      line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
+      vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
         'Color',[.55 .55 .55],'LineWidth',1.25);
     end
-    if ~isempty(vertlinelabs)  
+    if ~isempty(vertlinelabs) && addlegend==1 
       legendstrs=vertcat(legendstrs,vertlinelabs{i});
+    else
+      vline.HandleVisibility='off';
     end
   end
 end 
@@ -774,14 +902,14 @@ else
   xlabel(customxlabel)
 end
 % Add vertical axis ticks and labels
-if xyh==0
-  prc0=prctile(allx,0);  
-  prc50=prctile(allx,50);
-  prc100=max(allx);
+if xyorh==0
+  prc0=round(prctile(allx,0));  
+  prc50=round(prctile(allx,50));
+  prc100=round(max(allx));
 else
-  prc0=prctile(allh,0);  
-  prc50=prctile(allh,50);
-  prc100=max(allh);
+  prc0=round(prctile(allh,0));  
+  prc50=round(prctile(allh,50));
+  prc100=round(max(allh));
 end
 if prc0<10
   prc0=round(prc0,2);
@@ -810,7 +938,7 @@ if isempty(nowaxes.YTick) || isempty(nowaxes.YTickLabel)
 end
 %
 % Vertical axis label
-if xyh==0
+if xyorh==0
   ylabel(sprintf('X (E) %s',valunit))  
 else
   ylabel(sprintf('H %s',valunit))  
@@ -819,10 +947,16 @@ shrink(nowaxes,0.95,.95)
 % Move plots closer together
 serre(axeshdl,1,'down')
 
+% Adjust the size of the plot
+rmsplot.Units='Normalized';
+rmsplot.OuterPosition(3)=.9;
+rmsplot.OuterPosition(4)=.8;
+
 % Adjust cosmetics of plot, if desired
 if adjustplot==1
   keyboard
 end
+
 
 % Save figure
 if saveplot==1
@@ -840,49 +974,41 @@ if saveplot==1
     endhr=datenum2str(finaltime.Hour,0);
   end
   if isempty(customfigname)
-    if isempty(prclimit) || prclimit==100
-      if xyh==0
-        figname=sprintf(...
-          'RMS%s%s.XYZ.%s.%sto%s.%sto%s_%s%s%s%s.%s.eps',...
-          vallabel(1),rmsstr2,yearstr,datenum2str(jds(1),1),...
-          datenum2str(jds(length(jds)),1),starthr,endhr,freqstr1,...
-          freqstr2,freqstr3,freqstr4,upper(tzlabel));
+    if length(rmoutlier)>1
+      if rmoutlier(1)==0
+        finstr=sprintf('.btm%g.eps',rmoutlier(2));
       else
-        figname=sprintf(...
-          'RMS%s%s.HZ.%s.%sto%s.%sto%s_%s%s%s%s.%s.eps',...
-          vallabel(1),rmsstr2,yearstr,datenum2str(jds(1),1),...
-          datenum2str(jds(length(jds)),1),starthr,endhr,freqstr1,...
-          freqstr2,freqstr3,freqstr4,upper(tzlabel));
-      end
+        finstr=sprintf('.noOL%.2f.eps',rmoutlier(2));
+      end  
     else
-      if xyh==0
-        figname=sprintf(...
-          'RMS%s%s.XYZ.%s.%sto%s.%sto%s_%s%s%s%s.%s.btm%g.eps',...
-          vallabel(1),rmsstr2,yearstr,datenum2str(jds(1),1),...
-          datenum2str(jds(length(jds)),1),starthr,endhr,freqstr1,...
-          freqstr2,freqstr3,freqstr4,upper(tzlabel),prclimit);
-      else
-        figname=sprintf(...
-          'RMS%s%s.HZ.%s.%sto%s.%sto%s_%s%s%s%s.%s.btm%g.eps',...
-          vallabel(1),rmsstr2,yearstr,datenum2str(jds(1),1),...
-          datenum2str(jds(length(jds)),1),starthr,endhr,freqstr1,...
-          freqstr2,freqstr3,freqstr4,upper(tzlabel),prclimit);
-      end
+      finstr='.eps';    
     end
+    jd1=dat2jul(starttime.Month,starttime.Day,starttime.Year);
+    jd2=dat2jul(finaltime.Month,finaltime.Day,finaltime.Year);
+    if xyorh==0
+      figname=sprintf(...
+        'RMS%s%s.%s.XYZ.%s.%sto%s.%sto%s_%s%s%s%s.%s',...
+        vallabel(1),rmsstr2,wthrname,yearstr,datenum2str(jd1,1),...
+        datenum2str(jd2,1),starthr,endhr,freqstr1,...
+        freqstr2,freqstr3,freqstr4,upper(tzlabel));
+    else
+      figname=sprintf(...
+        'RMS%s%s.%s.HZ%d.%s.%sto%s.%sto%s_%s%s%s%s.%s',...
+        vallabel(1),rmsstr2,wthrname,xyhhow,yearstr,datenum2str(jd1,1),...
+        datenum2str(jd2,1),starthr,endhr,freqstr1,...
+        freqstr2,freqstr3,freqstr4,upper(tzlabel));
+    end
+    figname=strcat(figname,finstr);
   else
     figname=customfigname;
   end
   figname2=figdisp(figname,[],[],1,[],'epstopdf');
+  pause(0.5)
   [status,cmdout]=system(sprintf('mv %s %s',figname2,savedir));
   figname=fullfile(savedir,figname);
-  % Also have a PNG copy
-  pause(1)
-  fignamepng=figname;
-  fignamepng(length(figname)-2:length(figname))='png';
-  pngcmd=sprintf('convert -density 250 %s %s',figname,fignamepng);
-  [status,cmdout]=system(pngcmd);
+  pause(0.25)
 else
-  figname='notsaved';
+  figname='';
 end
 
 
