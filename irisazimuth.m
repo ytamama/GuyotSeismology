@@ -26,7 +26,7 @@ function [backazimuth,azimuth,distdeg,distmtr]=irisazimuth(evlalo,stalalo)
 % defval.m from csdms-contrib/slepian_alpha
 % Uses IRIS's distaz web service
 % 
-% Last Modified by Yuri Tamama, 10/06/2020
+% Last Modified by Yuri Tamama, 10/18/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('stalalo',[40.34585 -74.65475]);

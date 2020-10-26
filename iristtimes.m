@@ -37,7 +37,7 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 % Location of Guyot Hall from csdms-contrib/slepian_zero
 % defval.m from csdms-contrib/slepian_alpha
 % 
-% Last Modified by Yuri Tamama, 10/06/2020
+% Last Modified by Yuri Tamama, 10/18/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 defval('stalalo',[40.34585 -74.65475]);

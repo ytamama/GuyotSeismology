@@ -7,6 +7,7 @@ function evttbl=irisevent(eqinfo)
 % INPUTS
 % eqinfo : Search criteria we want to enter for our earthquakes, entered
 %          as a cell array in this order:
+%          {magrange; sttime; fintime; stalalo};
 %          magrange : Magnitude range of earthquakes, entered as a vector
 %                     with a lower and upper value (inclusive on both 
 %                     ends!)
@@ -30,9 +31,8 @@ function evttbl=irisevent(eqinfo)
 %          IRIS ID, origin times, event latitude, event longitude, depth,
 %          event magnitude, geoid distance from station to event (degrees),
 %          Great Circle distance from station to event (degrees), and the
-%          predicted travel time of the earliest seismic phase to Guyot
-%          Hall (seconds)
-%  
+%          predicted arrival time of the earliest seismic phase to Guyot
+%          Hall (UTC)
 % 
 % References
 % Based off of mcms2evt in csdms-contrib/slepian_oscar
@@ -40,7 +40,7 @@ function evttbl=irisevent(eqinfo)
 % Uses IRIS's event web service
 % Uses IRIS's travel time web service
 % 
-% Last Modified by Yuri Tamama, 10/06/2020
+% Last Modified by Yuri Tamama, 10/18/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Retrieve the input parameters we need
 magrange=eqinfo{1};
