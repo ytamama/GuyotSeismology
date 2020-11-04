@@ -7,6 +7,12 @@ function newcsv=adjrms(oldcsvs,newname,valtype,starttime,finaltime,tzone)
 % for which we collect the data from the inputted CSV files to make
 % a new CSV file. 
 % 
+% The seismic data were recorded by a Nanometrics Meridian Compact 
+% PH1 120 seismometer, stationed at Guyot Hall, Princeton University. 
+% The weather data were collected by a Vaisala WXT 530 weather station. 
+% This station, also stationed at Guyot Hall, is used with a Septentrio 
+% PolaRx5 receiver
+% 
 % INPUTS
 % oldcsvs : Name(s) of the CSV files to input, entered as a cell array
 %           in chronological order 
@@ -41,7 +47,7 @@ function newcsv=adjrms(oldcsvs,newname,valtype,starttime,finaltime,tzone)
 % References
 % Uses defval.m, in csdms-contrib/slepian_alpha
 %
-% Last Modified by Yuri Tamama, 10/18/2020
+% Last Modified by Yuri Tamama, 11/04/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values

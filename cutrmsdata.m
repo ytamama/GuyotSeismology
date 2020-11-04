@@ -1,8 +1,12 @@
 function [newtimevec,outputz,outputy,outputx,outputh]=cutrmsdata(...
     oldtimevec,inputz,inputy,inputx,inputh,starttime,endtime,timezone,rmstype)
 % 
-% Function to crop the inputted data, with each point corresponding to
-% a particular time, to a specified time interval.
+% Function to crop the inputted data, which is the RMS value of 
+% ground displacement/velocity/acceleration, with each point corresponding 
+% to a particular time, to a specified time interval.
+% 
+% The seismic data were recorded by a Nanometrics Meridian Compact 
+% PH1 120 seismometer, stationed at Guyot Hall, Princeton University. 
 % 
 % INPUTS
 % oldtimevec : The vector of datetimes, with each datetime corresponding
@@ -50,7 +54,7 @@ function [newtimevec,outputz,outputy,outputx,outputh]=cutrmsdata(...
 % Reference
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 %
-% Last Modified by Yuri Tamama, 10/10/2020
+% Last Modified by Yuri Tamama, 11/04/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 defval('timezone','UTC')
 
@@ -137,6 +141,5 @@ if ~isempty(inputh)
 else
   outputh=[];
 end  
-
 
 

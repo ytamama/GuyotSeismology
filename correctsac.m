@@ -2,7 +2,7 @@ function correctedsac=correctsac(sacfiles,measval,frequency,respfile)
 % 
 % Function that takes in 1 or 3 SAC files as input, deconvolves the 
 % SAC file(s) from the instrument response, and filters the SAC file(s)
-% at the desired frequency range.
+% at the desired frequency range. 
 % 
 % sacfiles : The name(s) of the SAC file(s) to instrument correct, 
 %            entered as string(s) in a cell array. 
@@ -42,9 +42,18 @@ function correctedsac=correctsac(sacfiles,measval,frequency,respfile)
 % Uses readsac.m, in csdms-contrib/slepian_oscar
 % Uses jul2dat.m, in csdms-contrib/slepian_oscar
 % 
-% Uses IRIS's resp web service to retrive response files, if necessary
+% Referred to the SAC manual, found here: 
+% http://ds.iris.edu/files/sac-manual/
+% Also see "The Seismic Analysis Code : a Primer and User's Guide"
+% by Helffrich et al., 2013
 % 
-% Last Modified by Yuri Tamama, 10/14/2020
+% The facilities of IRIS Web Services, specifically the RESP web service, 
+% were used for this code. IRIS Data Services are funded through the 
+% Seismological Facilities for the Advancement of Geoscience (SAGE) Award 
+% of the National Science Foundation under Cooperative Support Agreement
+% EAR-1851048.
+% 
+% Last Modified by Yuri Tamama, 11/04/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
