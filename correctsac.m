@@ -47,7 +47,7 @@ function correctedsac=correctsac(sacfiles,measval,frequency,respfile)
 % Also see "The Seismic Analysis Code : a Primer and User's Guide"
 % by Helffrich et al., 2013
 % 
-% The facilities of IRIS Web Services, specifically the RESP web service, 
+% The facilities of IRIS Data Services, specifically the RESP web service, 
 % were used for this code. IRIS Data Services are funded through the 
 % Seismological Facilities for the Advancement of Geoscience (SAGE) Award 
 % of the National Science Foundation under Cooperative Support Agreement
