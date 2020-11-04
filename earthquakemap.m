@@ -1,12 +1,13 @@
 function earthquakemap(filename,year,colorcode,maptype,manymaps)
 % 
 % Plots the earthquakes catalogued by IRIS for a given year (with catalog 
-% information stored in filename) on a world map, from plotcont.m
-% or plotplates.m
+% information stored in filename) on a world map
 % Color codes the earthquakes by magnitude or depth category
 % 
 % Inputs
 % filename : name of file that stores IRIS catalog information
+%            This file had been created using mcms2evt, in 
+%            csdms-contrib/slepian_oscar
 % year : year corresponding to the file
 % colorcode : 1 to color code by magnitude; 2 by depth range
 % maptype : plot earthquakes alongside 1, the outlines of continents, or 
@@ -17,42 +18,46 @@ function earthquakemap(filename,year,colorcode,maptype,manymaps)
 % Output
 % A map with the locations of the earthquakes in filename on a world map
 %
-% Last Modified by Yuri Tamama, 05/07/2020
+% Last Modified by Yuri Tamama, 11/04/2020
 % 
 % References
 % I) Code and data to plot the continents and plate outlines on a world map
-% from plotcont.m and plotplates.m, respectively, by Professor Frederik
-% Simons et al. in csdms-contrib/slepian_alpha
-% II) Earthquake depth ranges defined in "The Nature of Deep Focus
-% Earthquakes" by Frohlich, 1989
+% from plotcont.m and plotplates.m, in csdms-contrib/slepian_alpha
+% II) Earthquake depth ranges defined in The Nature of Deep Focus
+% Earthquakes by Frohlich, 1989
 % III) Earthquake magnitude ranges defined in Introduction to Seismology,
 % 3rd Edition by Shearer, 2019 
-% IV) Earthquake catalog information from IRIS's fdsnws-event service
+% IV) Earthquake catalog information had been obtained using the
+% facilities of IRIS Data Services, and specifically the IRIS Data 
+% Management Center. IRIS Data Services are funded through the
+% Seismological Facilities for the Advancement of Geoscience (SAGE) 
+% Award of the National Science Foundation under Cooperative Support 
+% Agreement EAR-1851048.
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Load data from applicable directory
+% Load data
 yearstr=num2str(year);
-filename=fullfile(getenv(),filename);
+yeardir=strcat(yearstr,'longterm');
+filename=fullfile(getenv('MC0'),filename);
 data=load(filename);
 eqlat=data(:,3);
 eqlon=data(:,4);
 if colorcode == 1
-    codevar=data(:,6);  %Magnitude
+  codevar=data(:,6);  %Magnitude
 else
-    codevar=data(:,5);  %Depth
+  codevar=data(:,5);  %Depth
 end
 
 
 % Prepare the latitudes and longitudes of the earthquakes so they are ready
 % to plot
-
 % Convert the longitudes from a -180 to 180 scale to a 0 to 360 scale
 numpoints=length(eqlon);
 for l=1:numpoints
-    if eqlon(l) < 0
-        eqlon(l)=eqlon(l)+360;
-    end    
+  if eqlon(l) < 0
+      eqlon(l)=eqlon(l)+360;
+  end    
 end
 
 % Categorize the earthquakes!
@@ -108,9 +113,9 @@ lon3=eqlon(ind3);
 % Plot a blank world map using either plotcont.m or plotplates.m
 % Use their default settings!
 if maptype == 1
-    mapstr='Continents';
+  mapstr='Continents';
 else
-    mapstr='Plates';
+  mapstr='Plates';
 end    
 
 if manymaps == 1      % Plot each category on a separate map
@@ -144,7 +149,7 @@ if manymaps == 1      % Plot each category on a separate map
      end
      
      % Save it!
-     saveplot=fullfile(getenv(),savestr);
+     saveplot=fullfile(getenv('MC'),yearstr,yeardir,savestr);
      print('-depsc',saveplot); 
  
   end 
@@ -167,12 +172,8 @@ else  % Plot everything on only one map
   % Save it!
   savestr=strcat(yearstr,sprintf('%s%smap',lower(plotstr),...
     lower(mapstr)));
-  saveplot=fullfile(getenv(),savestr);
+  saveplot=fullfile(getenv('MC'),yearstr,yeardir,savestr);
   print('-depsc',saveplot); 
      
 end
 
-
-
-
-end 
