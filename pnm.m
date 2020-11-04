@@ -1,4 +1,5 @@
-function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,saveplot,savedir)
+function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,...
+  freqband,saveplot,savedir)
 % 
 % Function to plot the New Low Noise Model (NLNM) and New High Noise Model 
 % (NHNM), developed by Peterson 1993 
@@ -19,6 +20,9 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,saveplot,savedir)
 %         construct the NHNM. See nhnm.csv 
 %         Enter the full path to that file if necessary.
 %         Default: 'nhnm.csv'
+% freqband : If we want to plot any frequency bands, enter a 2 element
+%            array with the low and high end of the frequency band!
+%            Default: Empty array, for nothing
 % saveplot : Do we want to save our figure?
 %            0 - No (default)
 %            1 - Yes
@@ -34,10 +38,10 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,saveplot,savedir)
 % References
 % Peterson, J. R. Observations and modeling of seismic background noise. 
 %    http://pubs.er.usgs.gov/publication/ofr93322 (1993). Last Accessed
-%    October 5 2020
-% Uses defval.m, shrink.m, and figdisp.m from csdms-contrib/slepian_alpha
+%    Nov 4 2020
+% Uses defval.m, shrink.m, figdisp.m, xtraxis.m, from csdms-contrib/slepian_alpha
 %
-% Last Modified by Yuri Tamama, 10/05/2020
+% Last Modified by Yuri Tamama, 11/4/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -45,6 +49,7 @@ defval('measval',0)
 defval('xval',0)
 defval('lncsv','nlnm.csv')
 defval('hncsv','nhnm.csv')
+defval('freqband',[])
 defval('saveplot',0)
 defval('savedir',pwd)
 
@@ -83,41 +88,77 @@ else
 end
 
 % Plot the noise model
-yunits={'(m^2/Hz)';'((m/s)^2/Hz)';'((m/s^2)^2/Hz)'};
+yunits={'dB (m^2/Hz)';'dB ((m/s)^2/Hz)';'dB ((m/s^2)^2/Hz)'};
 figurehdl=figure();
 lnplot=plot(lnx,nlnm);
 hold on
 hnplot=plot(hnx,nhnm);
 ax=gca;
-ax.YLim=[-200 -60];
+ax.YLim=[-250 150];
 ax.XScale='log';
+% Scale the figure
+ax.Position(4)=.65;
+% Plot the frequency band
+if ~isempty(freqband)
+  if xval==0
+    val1=freqband(1);
+    val2=freqband(2);
+  else
+    val1=1/freqband(1);
+    val2=1/freqband(2);
+  end
+  val1str=num2str(val1);
+  vline1=line([val1 val1],ylim,'LineStyle','--','Color',[0.35 0.35 0.35]);
+  vline1.HandleVisibility='off';
+  val2str=num2str(val2);
+  vline2=line([val2 val2],ylim,'LineStyle','--','Color',[0.35 0.35 0.35]);
+  vline2.HandleVisibility='off';
+end
 % Title
 title('Peterson (1993) Noise Model')
+ax.Title.Units='normalized';
+ax.Title.Position(2)=1.175;
 % Axis labels and legend
+if ~isempty(freqband)
+  plotlgd=legend({'New Low Noise Model';'New High Noise Model'});
+else
+  plotlgd=legend({'New Low Noise Model';'New High Noise Model'});
+end
 if xval==0
   xlabel('Frequency (Hz)')
+  ax.XLabel.FontSize=10;
   ax.XLim=[1e-5 10];
-  plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
-    'Location','southwest');
+  plotlgd.Location='southwest';
+  % Add an axis for the period, as well
+  x2pos=[1e-4 1e-2 1];
+  x2lbls={'10000';'100';'1'};
+  newax=xtraxis(ax,x2pos,x2lbls,'Period (s)',[],[],[]);
+  newax.XLim=[0.1 1e5];
+  newax.XTick=[1 1e2 1e4];
+  newax.XDir='reverse';
+  newax.XTickLabel={'1';'100';'10000'};
+  newax.XLabel.FontSize=10;
 else
   xlabel('Period (s)')
   ax.XLim=[0.1 10^5];
-  plotlgd=legend({'New Low Noise Model';'New High Noise Model'},...
-    'Location','northwest');
+  plotlgd.Location='southeast';
 end
-ylabel(sprintf('Power Spectral Density %s',yunits{measval+1}))
-% Adjust plot size
-figurehdl.Units='Normalized';
-figurehdl.OuterPosition(3)=.75;
-figurehdl.OuterPosition(4)=.8;
-shrink(ax,1,1.25) 
+ax.YLabel.String=sprintf('Power Spectral Density %s',yunits{measval+1});
 hold off
+% Adjust plot size
+figurehdl.Units='normalized';
+figurehdl.Position(3)=.75;
 
 if saveplot==1
   yunit={'disp';'vel';'acc'};
   xunit={'freq';'pd'};
-  figname=sprintf('PetersonNoise_%s_%s.eps',yunit{measval+1},...
-    xunit{xval+1});   
+  if ~isempty(freqband)
+    figname=sprintf('PetersonNoise_%s_%s_%s%s.eps',yunit{measval+1},...
+      xunit{xval+1},val1str,val2str);  
+  else
+    figname=sprintf('PetersonNoise_%s_%s.eps',yunit{measval+1},...
+      xunit{xval+1});   
+  end
   % Save and move to our requested directory
   figname2=figdisp(figname,[],[],1,[],'epstopdf');
   [status,cmdout]=system(sprintf('mv %s %s',figname2,savedir));
