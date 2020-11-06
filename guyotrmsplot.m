@@ -1,8 +1,8 @@
 function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
-  measval,rmstype,yrsplotted,starttime,finaltime,timezone,tzlabel,...
+  measval,rmstype,yrsplotted,starttime,finaltime,tzone,tzlabel,...
   rmoutlier,saveplot,savedir,addlegend,frequency,xyh,wthrinfo,adjustplot,...
-  vertlines,vertlinelabs,customtitle,customxlabel,customfigname,lineclrs,...
-  linewdh,linestyls)
+  vertlines,vertclrs,vertlinelabs,customtitle,customxlabel,customfigname,...
+  lineclrs,linewdh,linestyls)
 %
 % Function to plot the RMS displacement, velocity, or acceleration 
 % computed by the guyotrms*.m programs in a time series, comparing the
@@ -36,8 +36,8 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %             datetime vector in local time. 
 %             If plotting 'qrt' (rmstype=2), input a number from 0-23 
 %             signifying an hour (in UTC time)
-% timezone : The MATLAB time zone of the times plotted
-%            Default: 'UTC'
+% tzone : The MATLAB time zone of the times plotted
+%         Default: 'UTC'
 % tzlabel : The label characterizing the time zone of the times plotted
 % rmoutlier :  How we removed the outliers for the values plotted
 %              when they were generated in the csv-producing codes. 
@@ -115,6 +115,9 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 %             matching that of the inputted data. 
 %             Enter an empty vector if we do not wish to plot vertical
 %             lines.
+% vertclrs : The colors for the vertical lines. Enter an empty vector if 
+%            we do not wish to plot vertical lines, or use MATLAB's 
+%            default colors.
 % vertlinelabs : How do we want to mark those lines in the legend?
 %                Enter as a cell array containing the label(s), as strings.
 %                Enter an empty cell array if we do not wish to plot 
@@ -167,8 +170,18 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 % 
 % References
 % Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
+%
+% Computing the root mean squared of ground motion is inspired by 
+% SeismoRMS, by Thomas Lecocq et. al.,
+% https://github.com/ThomasLecocq/SeismoRMS, as well as 
+% Lecocq et al., 2020, DOI: 10.1126/science.abd2438
 % 
-% Last Modified by Yuri Tamama, 10/14/2020
+% Superimposing weather data onto the seismic record is inspired by
+% Bonnefoy-Claudet et al., 2006, DOI: 10.1016/j.earscirev.2006.07.004
+% Groos & Ritter, 2009, DOI: 10.1111/j.1365-246X.2009.04343.x
+% Ash, 2018 (Junior Paper of Princeton University's Geosciences Department)
+% 
+% Last Modified by Yuri Tamama, 10/26/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set Default Values
@@ -181,6 +194,7 @@ if isempty(xyh)
   xyorh=0;
 else
   if length(xyh)>1
+    xyorh=xyh(1);
     xyhhow=xyh(2);
   end
 end
@@ -197,6 +211,7 @@ if plotwthr==1
 end
 defval('adjustplot',0)
 defval('vertlines',[])
+defval('vertclrs',{})
 defval('vertlinelabs',{})
 defval('lineclrs',{[0 0.7 0.9];[0 0.85 0];[1 .65 0];[1 0 0.25]})
 defval('linewdh',[1 1 1 1])
@@ -244,22 +259,20 @@ fprintf('Any vertical lines will be colored in grayscale.\n');
 % Speaking of plotting settings, figure out specific color scheme
 % of vertical lines, if any
 vertstyls={};
-allstyls={'--';':';'-.'};
+allstyls={'--';'--';'--'};
 if ~isempty(vertlines)
   for i=1:length(vertlines)
-    stylind=mod(i,3);
-    if stylind==0
-      stylind=3;
-    end
-    vertstyls=vertcat(vertstyls,allstyls{stylind});
+    vertstyls=vertcat(vertstyls,allstyls{1});
   end
 end
 
 % Figure out units
 valunits={'nm';'nm/s';'nm/s^2'};
 vallabels={'Displacement';'Velocity';'Acceleration'};
+vallblminis={'Disp.';'Vel.';'Acc.'};
 valunit=valunits{measval+1};
 vallabel=vallabels{measval+1};
+vallblmini=vallblminis{measval+1};
 % Figure out intervals
 if rmstype==0
   rmsstr='Daily';
@@ -276,12 +289,7 @@ freqstr1=sprintf('%.2f',frequency(1));
 freqstr2=sprintf('%.2f',frequency(2));
 freqstr3=sprintf('%.2f',frequency(3));
 freqstr4=sprintf('%.2f',frequency(4)); 
-% Periods
-pdstr1=sprintf('%.2f',1/frequency(1));
-pdstr2=sprintf('%.2f',1/frequency(2));
-pdstr3=sprintf('%.2f',1/frequency(3));
-pdstr4=sprintf('%.2f',1/frequency(4));
-    
+
 
 % Load data. We're loading these as cells first, since the
 % length of the data for each year within each component might be
@@ -304,7 +312,7 @@ for i=1:4
     % different lengths
     timevec=datetime(timevec,'InputFormat','eeee dd-MMM-uuuu HH:mm:ss');
     if rmstype<2
-      timevec.TimeZone=timezone;
+      timevec.TimeZone=tzone;
     else
       timevec.TimeZone='UTC';
     end
@@ -400,9 +408,9 @@ end
 % Inclusive of start and end time
 % if ~isempty(starttime) && ~isempty(finaltime)
 if rmstype<2
-  timevector.TimeZone=timezone;
+  timevector.TimeZone=tzone;
   [timevector,rmszmat2,rmsymat2,rmsxmat2,rmshmat2]=cutrmsdata(timevector,...
-    rmszmat,rmsymat,rmsxmat,rmshmat,starttime,finaltime,timezone,rmstype);
+    rmszmat,rmsymat,rmsxmat,rmshmat,starttime,finaltime,tzone,rmstype);
 else
   timevector.TimeZone='UTC';
   [timevector,rmszmat2,rmsymat2,rmsxmat2,rmshmat2]=cutrmsdata(timevector,...
@@ -411,7 +419,7 @@ end
 numtimes2=length(timevector);
 
 % Now: convert timevector to local time
-timevector.TimeZone=timezone;
+timevector.TimeZone=tzone;
 
 % Horizontal axis labels 
 % Place ticks on Sundays, for daily and hourly
@@ -430,13 +438,13 @@ if rmstype<2
     % Hourly averages: tick marks at midnight Saturday and Monday
     if strcmpi('Saturday',tickdaystr)
       if (rmstype==1 && ticktime.Hour==0) || rmstype==0
-        ticklabels=vertcat(ticklabels,'Sa');
+        ticklabels=vertcat(ticklabels,'S');
         ticksat=[ticksat;ticktime];
       end
     elseif strcmpi('Monday',tickdaystr) && rmstype==1
      if ticktime.Hour==0
        ticksat=[ticksat; ticktime];   
-       ticklabels=vertcat(ticklabels,'M'); 
+       ticklabels=vertcat(ticklabels,'S'); 
      end
     elseif strcmpi('Sunday',tickdaystr) && rmstype==0
       ticksat=[ticksat; ticktime];
@@ -534,12 +542,18 @@ end
 % Plot the data!
 axeshdl=[];
 rmsplot=figure();
+% Adjust the size of the plot
+rmsplot.Units='Normalized';
+rmsplot.OuterPosition(3)=.9;
+rmsplot.OuterPosition(4)=.9;
 % Z Component
 if xyh==0
   subplot(3,1,1)
 else
   subplot(2,1,1)
 end
+nowaxes=gca;
+axeshdl=[axeshdl; nowaxes];
 plotted1st=0;
 if plotwthr==1
   yyaxis left
@@ -568,20 +582,20 @@ xlim([timevector(1) timevector(length(timevector))])
 % Plot vertical lines, if applicable
 if ~isempty(vertlines)
   for i=1:length(vertlines)
-    if strcmp(vertstyls{i},'--') || strcmp(vertstyls{i},':')
-      line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-        'Color',[.55 .55 .55],'LineWidth',1.5);
-    else
-      line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-        'Color',[.55 .55 .55],'LineWidth',1.25);
+    vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
+      'Color',[.55 .55 .55],'LineWidth',1.2);
+    if ~isempty(vertclrs)
+      vline.Color=vertclrs{i};
     end
   end
 end
-% Add grid lines
-nowaxes=gca;
-axeshdl=[axeshdl; nowaxes];
+% Cosmetics and grid lines
+nowaxes.FontSize=8.5;
 nowaxes.XTickMode='manual';
 nowaxes.XTick=ticksat;
+if length(yrsplotted)==1
+  nowaxes.YColor=yrline.Color;
+end
 grid on
 % Remove horizontal axis labels
 nolabels(nowaxes,1)
@@ -616,14 +630,15 @@ if isempty(nowaxes.YTick) || isempty(nowaxes.YTickLabel)
   nowaxes.YTickLabel={num2str(prc0);num2str(prc50);num2str(prc100)};
 end
 %
-ylabel(sprintf('Z %s',valunit))   
+ylabel(sprintf('Z %s',valunit))  
+% Plot weather if necessary
 if plotwthr==1
   yyaxis right
-  [~,titlestrw,~]=addvairms(wthrcsv,wthrmeas,starttime,finaltime);  
+  [~,titlestrw,~]=addvairms(wthrcsv,wthrmeas,starttime,finaltime,tzone);  
 end  
 
 % Title
-if length(rmoutlier)>1
+if ~isempty(rmoutlier)
   if rmoutlier(1)==0
     titlestrrm=sprintf(' (Bottom %g%% per Hour)',rmoutlier(2));
   else
@@ -641,28 +656,20 @@ if isempty(customtitle)
   titlestr2='Recorded at Guyot Hall, Princeton University (PP S0001)';
 
   % Frequencies
-  freqtitle=['[',freqstr1,' {\color{magenta}',freqstr2,' \color{magenta}',...
-    freqstr3,'} ',freqstr4,'] Hz'];
-  % Periods
-  pdtitle=['[',pdstr4,' {\color{magenta}',pdstr3,' \color{magenta}',...
-    pdstr2,'} ',pdstr1,'] s'];
-  titlestr3=[freqtitle,'  ',pdtitle];
-  if xyh==0
+  titlestr3=sprintf('Filtered to %s to %s Hz',freqstr2,freqstr3);
+  if xyorh==0
     if ~isempty(vertlines) && ~isempty(vertlinelabs)
       titlestrv='Vertical Lines Labeled Chronologically';
       if plotwthr==0
-        title({titlestr1;titlestr2;titlestr3;titlestrv},'interpreter',...
-          'tex')
+        titlestrs={titlestr1;titlestr2;titlestr3;titlestrv};
       else
-        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestrv},...
-          'interpreter','tex')
+        titlestrs={titlestr1;titlestrw;titlestr2;titlestr3;titlestrv};
       end    
     else
       if plotwthr==0  
-        title({titlestr1;titlestr2;titlestr3},'interpreter','tex')
+        titlestrs={titlestr1;titlestr2;titlestr3};
       else
-        title({titlestr1;titlestrw;titlestr2;titlestr3},'interpreter',...
-          'tex')
+        titlestrs={titlestr1;titlestrw;titlestr2;titlestr3};
       end
     end
   else
@@ -670,32 +677,33 @@ if isempty(customtitle)
     if ~isempty(vertlines) && ~isempty(vertlinelabs)
       titlestrv='Vertical Lines Labeled Chronologically';
       if plotwthr==0
-        title({titlestr1;titlestr2;titlestr3;titlestr4;titlestrv},...
-          'interpreter','tex')
+        titlestrs={titlestr1;titlestr2;titlestr3;titlestr4;titlestrv};
       else
-        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestr4;...
-          titlestrv},'interpreter','tex')
+        titlestrs={titlestr1;titlestrw;titlestr2;titlestr3;titlestr4;...
+          titlestrv};
       end
     else
       if plotwthr==0
-        title({titlestr1;titlestr2;titlestr3;titlestr4},'interpreter',...
-          'tex')
+        titlestrs={titlestr1;titlestr2;titlestr3;titlestr4};
       else
-        title({titlestr1;titlestrw;titlestr2;titlestr3;titlestr4},...
-          'interpreter','tex')
+        titlestrs={titlestr1;titlestrw;titlestr2;titlestr3;titlestr4};
       end
     end
   end
+  title(titlestrs,'interpreter','tex')
 else
   title(customtitle,'interpreter','tex')
 end
-  
+nowaxes.Title.FontSize=8.5;
 shrink(nowaxes,0.95,.95) 
-%
+
+
 % Plot horizontal components
 if xyorh==0
   % Y Component
   subplot(3,1,2)
+  nowaxes=gca;
+  axeshdl=[axeshdl; nowaxes];
   plotted1st=0;
   if plotwthr==1
     yyaxis left
@@ -723,20 +731,21 @@ if xyorh==0
   % Plot vertical lines, if applicable
   if ~isempty(vertlines)
     for i=1:length(vertlines)
-      if strcmp(vertstyls{i},'--') || strcmp(vertstyls{i},':')
-        line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-          'Color',[.55 .55 .55],'LineWidth',1.5);
-      else
-        line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-          'Color',[.55 .55 .55],'LineWidth',1.25);
+      vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
+        'Color',[.55 .55 .55],'LineWidth',1.2);
+      keyboard
+      if ~isempty(vertclrs)
+        vline.Color=vertclrs{i};
       end
     end
   end
-  % Add grid lines, if requested
-  nowaxes=gca;
-  axeshdl=[axeshdl; nowaxes];
+  % Cosmetics and grid lines
+  nowaxes.FontSize=8.5;
   nowaxes.XTickMode='manual';
   nowaxes.XTick=ticksat;
+  if length(yrsplotted)==1
+    nowaxes.YColor=yrline.Color;
+  end
   grid on
   % Remove horizontal axis label
   nolabels(nowaxes,1) 
@@ -774,7 +783,7 @@ if xyorh==0
   shrink(nowaxes,0.95,.95) 
   if plotwthr==1
     yyaxis right
-    addvairms(wthrcsv,wthrmeas,starttime,finaltime)
+    addvairms(wthrcsv,wthrmeas,starttime,finaltime,tzone)
   end
 end
 %
@@ -794,8 +803,10 @@ if xyorh==0
       yrline=plot(timevector,plotdata);
       if length(yrsplotted)==1
         yrline.Color=[0 0 1];
+        legendstrs=vertcat(legendstrs,sprintf('Ground %s',vallblmini));
       else
         yrline.Color=lineclrs{i};
+        legendstrs=vertcat(legendstrs,num2str(allyrs(i)));
       end
       yrline.LineStyle=linestyls{i};
       yrline.LineWidth=linewdh(i);
@@ -803,7 +814,6 @@ if xyorh==0
         hold on
         plotted1st=1;
       end
-      legendstrs=vertcat(legendstrs,num2str(allyrs(i)));
     end
   end
   ylim([dataminx datamaxx]); 
@@ -822,8 +832,10 @@ else
       yrline=plot(timevector,plotdata);
       if length(yrsplotted)==1
         yrline.Color=[0 .75 .75];
+        legendstrs=vertcat(legendstrs,sprintf('Ground %s',vallblmini));
       else
         yrline.Color=lineclrs{i};
+        legendstrs=vertcat(legendstrs,num2str(allyrs(i)));
       end
       yrline.LineStyle=linestyls{i};
       yrline.LineWidth=linewdh(i);
@@ -831,30 +843,25 @@ else
         hold on
         plotted1st=1;
       end
-      legendstrs=vertcat(legendstrs,num2str(allyrs(i)));
     end
   end
   ylim([dataminh datamaxh]);
   datamax=datamaxh;
 end    
-xlim([timevector(1) timevector(length(timevector))])
-if plotwthr==1
-  yyaxis right
-  [wthrlgd,~,wthrname]=addvairms(wthrcsv,wthrmeas,starttime,finaltime);  
-  legendstrs=vertcat(legendstrs,wthrlgd);
+if xyorh==0
+  ylabel(sprintf('X (E) %s',valunit))  
 else
-  wthrname='';
+  ylabel(sprintf('H %s',valunit))  
 end
+xlim([timevector(1) timevector(length(timevector))])
 
 % Plot vertical lines, if applicable
 if ~isempty(vertlines)
   for i=1:length(vertlines)
-    if strcmp(vertstyls{i},'--') || strcmp(vertstyls{i},':')
-      vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-        'Color',[.55 .55 .55],'LineWidth',1.5);
-    else
-      vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
-        'Color',[.55 .55 .55],'LineWidth',1.25);
+    vline=line([vertlines(i) vertlines(i)],ylim,'LineStyle',vertstyls{i},...
+      'Color',[.55 .55 .55],'LineWidth',1.2);
+    if ~isempty(vertclrs)
+      vline.Color=vertclrs{i};
     end
     if ~isempty(vertlinelabs) && addlegend==1 
       legendstrs=vertcat(legendstrs,vertlinelabs{i});
@@ -863,15 +870,16 @@ if ~isempty(vertlines)
     end
   end
 end 
-% Add legend if requested
-if addlegend==1 
-  legend(legendstrs,'Location','northeast','FontSize',6); 
-end
-% Add grid lines
+
+% Cosmetics and grid lines
 nowaxes=gca;
 axeshdl=[axeshdl; nowaxes];
+nowaxes.FontSize=8.5;
 nowaxes.XTickMode='manual';
 nowaxes.XTick=ticksat;
+if length(yrsplotted)==1
+  nowaxes.YColor=yrline.Color;
+end
 grid on
 % Add horizontal axis ticks and labels
 nowaxes.XTickLabelMode='manual';
@@ -880,30 +888,78 @@ monthnames={'Jan';'Feb';'Mar';'Apr';'May';'June';'July';'Aug';'Sept';...
   'Oct';'Nov';'Dec'};
 startdate=timevector(1);
 startwkday=getweekday(startdate);
-finaldate=timevector(numtimes2);
-finalwkday=getweekday(finaldate);
-if rmstype==1
-  datestr1=sprintf('%s:%s:%s %s, %s %d',datenum2str(startdate.Hour,0),...
-    datenum2str(startdate.Minute,0),datenum2str(startdate.Second,0),...
-    startwkday,monthnames{startdate.Month},startdate.Day);
-  datestr2=sprintf('%s:59:59 %s, %s %d',datenum2str(finaldate.Hour,0),...
-    finalwkday,monthnames{finaldate.Month},finaldate.Day);
+if startdate.Day<8
+  startstr='First';
+elseif startdate.Day<15
+  startstr='Second';
+elseif startdate.Day<22
+  startstr='Third';
+elseif startdate.Day<29
+  startstr='Fourth';
 else
-  datestr1=sprintf('%s, %s %d',startwkday,monthnames{startdate.Month},...
-    startdate.Day);
-  datestr2=sprintf('%s, %s %d',finalwkday,monthnames{finaldate.Month},...
-    finaldate.Day);
+  startstr='Fifth';
+end
+% First Weekday in %s  
+finaldate=timevector(length(timevector));
+finalwkday=getweekday(finaldate);
+if finaldate.Day<8
+  finalstr='First';
+elseif finaldate.Day<15
+  finalstr='Second';
+elseif finaldate.Day<22
+  finalstr='Third';
+elseif finaldate.Day<29
+  finalstr='Fourth';
+else
+  finalstr='Fifth';
+end
+% Years plotted
+if length(yrsplotted)>1
+  yrplstr=sprintf('%d-%d',yrsplotted(1),yrsplotted(length(yrsplotted)));
+else
+  yrplstr=num2str(yrsplotted);
+end
+% X Axis Label
+% Have the full date if plotting only 1 year, otherwise label the 
+% weekdays we start and end on
+if rmstype==0
+  if length(yrsplotted)>1
+    datestr1=sprintf('%s %s in %s',startstr,startwkday,...
+      monthnames{startdate.Month});
+    datestr2=sprintf('%s %s in %s',finalstr,finalwkday,...
+      monthnames{finaldate.Month});
+  else
+    datestr1=sprintf('%s %d',monthnames{startdate.Month},startdate.Day);
+    datestr2=sprintf('%s %d',monthnames{finaldate.Month},finaldate.Day);
+  end
+elseif rmstype==1
+  if length(yrsplotted)>1
+    datestr1=sprintf('%s:%s:%s %s %s in %s',datenum2str(startdate.Hour,0),...
+      datenum2str(startdate.Minute,0),datenum2str(startdate.Second,0),...
+      startstr,startwkday,monthnames{startdate.Month});
+    datestr2=sprintf('%s:59:59.99 %s %s in %s',...
+      datenum2str(finaldate.Hour,0),finalstr,finalwkday,...
+      monthnames{finaldate.Month});
+  else
+    datestr1=sprintf('%s:%s:%s %s %d',datenum2str(startdate.Hour,0),...
+      datenum2str(startdate.Minute,0),datenum2str(startdate.Second,0),...
+      monthnames{startdate.Month},startdate.Day);
+    datestr2=sprintf('%s:59:59.99 %s %d',...
+      datenum2str(finaldate.Hour,0),monthnames{finaldate.Month},...
+      finaldate.Day);
+  end
+else
+  datestr1=sprintf('%s:%s:%s',datenum2str(startdate.Hour,0),...
+    datenum2str(startdate.Minute,0),datenum2str(startdate.Second,0));
+  datestr2=sprintf('%s:59:59.99', datenum2str(finaldate.Hour,0));
 end
 if isempty(customxlabel)
-  if length(yrsplotted)<2
-    xlabel(sprintf('%s to %s %d (%s)',datestr1,datestr2,yrsplotted,tzlabel)); 
-  else
-    xlabel(sprintf('%s to %s %s (MM/DD from %d)',datestr1,datestr2,...
-      tzlabel,yrsplotted(length(yrsplotted))));
-  end
+  xlabel(sprintf('%s to %s, %s (%s)',datestr1,datestr2,yrplstr,tzlabel)); 
 else
   xlabel(customxlabel)
 end
+nowaxes.XLabel.FontSize=8.5;
+nowaxes.FontSize=8.5;
 % Add vertical axis ticks and labels
 if xyorh==0
   prc0=round(prctile(allx,0));  
@@ -941,19 +997,36 @@ if isempty(nowaxes.YTick) || isempty(nowaxes.YTickLabel)
 end
 %
 % Vertical axis label
-if xyorh==0
-  ylabel(sprintf('X (E) %s',valunit))  
-else
-  ylabel(sprintf('H %s',valunit))  
-end
 shrink(nowaxes,0.95,.95) 
+
+% Plot weather phenomena
+if plotwthr==1
+  yyaxis right
+  [wthrlgd,~,wthrname]=addvairms(wthrcsv,wthrmeas,starttime,finaltime,tzone);  
+  legendstrs=vertcat(legendstrs,wthrlgd);
+  % Add to the Y axis label
+  wthrlist={'Mean Wind Direction';'Mean Wind Speed';'Air Temperature';...
+    'Relative Humidity';'Air Pressure';'Rain Accumulation';...
+    'Hail Accumulation'};
+  wthrfull=wthrlist{wthrmeas};
+  wthrunits={'deg';'mps';'deg';'%';'bars';'mm';'hits'};
+  wthrunit=wthrunits{wthrmeas};
+  nowaxes.YLabel.String=sprintf('%s (%s)',wthrfull,wthrunit);
+  nowaxes.YLabel.Rotation=270;
+  nowaxes.YLabel.Units='normalized';
+  nowaxes.YLabel.Position(1)=1.05;
+  nowaxes.YLabel.Position(2)=1;
+else
+  wthrname='';
+end
+
+% Add legend if requested
+if addlegend==1 
+  legend(legendstrs,'Location','northwest','FontSize',6); 
+end
+
 % Move plots closer together
 serre(axeshdl,1,'down')
-
-% Adjust the size of the plot
-rmsplot.Units='Normalized';
-rmsplot.OuterPosition(3)=.9;
-rmsplot.OuterPosition(4)=.8;
 
 % Adjust cosmetics of plot, if desired
 if adjustplot==1
@@ -1009,7 +1082,12 @@ if saveplot==1
   pause(0.5)
   [status,cmdout]=system(sprintf('mv %s %s',figname2,savedir));
   figname=fullfile(savedir,figname);
-  pause(0.25)
+  pause(1)
+  % Convert to PNG
+  fignamepng=strcat(figname(1:length(figname)-3),'png');
+  [status,cmdout]=system(sprintf('convert -density 250 %s %s',figname,...
+    fignamepng));
+  pause(1)
 else
   figname='';
 end
