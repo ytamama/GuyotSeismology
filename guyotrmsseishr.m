@@ -98,6 +98,9 @@ function [outputtbl,csvfile,probtimes,mmstimes,msctimes,mdtimes]=guyotrmsseishr(
 % Checking whether a file is in the current directory is a neat trick I 
 % found from the mathworks MATLAB forum!
 %
+% The seismic data are recorded by Nanometrics Meridian PH-120 seismometer,
+% situated in the basement of Guyot Hall.
+%
 % This routine is inspired by SeismoRMS, by Thomas Lecocq et. al.,
 % https://github.com/ThomasLecocq/SeismoRMS, as well as 
 % Lecocq et al., (2020), DOI: 10.1126/science.abd2438

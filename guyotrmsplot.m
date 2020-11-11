@@ -175,6 +175,9 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 % SeismoRMS, by Thomas Lecocq et. al.,
 % https://github.com/ThomasLecocq/SeismoRMS, as well as 
 % Lecocq et al., 2020, DOI: 10.1126/science.abd2438
+%
+% The seismic data are recorded by Nanometrics Meridian PH-120 seismometer,
+% situated in the basement of Guyot Hall.
 % 
 % Superimposing weather data onto the seismic record is inspired by
 % Bonnefoy-Claudet et al., 2006, DOI: 10.1016/j.earscirev.2006.07.004

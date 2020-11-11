@@ -2,9 +2,6 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 % 
 % Function that constructs and outputs the results of an IRIS 
 % traveltime query. 
-% IRIS's traveltime web service generates the predicted travel times 
-% of various phases for an event at a specified latitude, longitude, 
-% and depth to reach a specified station latitude and longitude.
 % 
 % INPUTS
 % evlalodist : A vector containing the latitude and longitude, in that 
@@ -14,8 +11,8 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 %              enter a vector of length 1.
 %              Example) [30 -90]
 %              Example) [10]
-% evdep : The depth of the event, in km. Enter -1 if unknown or is an 
-%         "airquake".
+% evdep : The depth of the event, in km. Enter -1 if unknown or occurs 
+%         above ground.
 % evdistunit : Enter the units of the distance entered in evlalodist, 
 %              if using that option.
 % 
@@ -34,10 +31,15 @@ function ttimetbl=iristtimes(evlalodist,evdep,evdistunit,stalalo)
 %            to station (degrees), travel time (seconds)
 % 
 % References:
-% Location of Guyot Hall from csdms-contrib/slepian_zero
+% Uses IRIS's traveltime web service
+% Location of Guyot Hall from guyotphysics.m in csdms-contrib/slepian_zero
 % defval.m from csdms-contrib/slepian_alpha
+% Uses IRIS's fdsnws-event web service
+% Learned how to use awk from the IRIS Seismology Skill Building Workshop 
+% in Summer 2020, of the IRIS Education and Public Outreach Program, as 
+% well as from mcms2evt in csdms-contrib/slepian_oscar
 % 
-% Last Modified by Yuri Tamama, 10/18/2020
+% Last Modified by Yuri Tamama, 10/26/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 defval('stalalo',[40.34585 -74.65475]);

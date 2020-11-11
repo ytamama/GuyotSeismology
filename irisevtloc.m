@@ -1,8 +1,8 @@
 function locationstr=irisevtloc(evtid)
 % 
 % Function that outputs the name of the region where an IRIS-recorded 
-% seismic event takes place. The function submits a query to the event 
-% web service from IRIS.
+% seismic event takes place. The function submits a query to the 
+% fdsnws-event web service from IRIS.
 % 
 % INPUT
 % evtid : The IRIS ID of the seismic event
@@ -13,7 +13,10 @@ function locationstr=irisevtloc(evtid)
 %          vector with the latitude first, then longitude
 % 
 % References
-% Uses IRIS's event web service
+% Uses IRIS's fdsnws-event web service
+% Learned how to use awk from the IRIS Seismology Skill Building Workshop 
+% in Summer 2020, of the IRIS Education and Public Outreach Program, as 
+% well as from mcms2evt in csdms-contrib/slepian_oscar
 % 
 % Last Modified by Yuri Tamama, 08/13/2020
 %
