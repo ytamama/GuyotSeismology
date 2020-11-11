@@ -22,11 +22,15 @@ function [backazimuth,azimuth,distdeg,distmtr]=irisazimuth(evlalo,stalalo)
 %           the event and station
 % 
 % References:
-% Location of Guyot Hall from csdms-contrib/slepian_zero
-% defval.m from csdms-contrib/slepian_alpha
+% Location of Guyot Hall from guyotphysics.m in csdms-contrib/slepian_zero
+% Uses defval.m from csdms-contrib/slepian_alpha
 % Uses IRIS's distaz web service
+% Learned how to use grep, sed, and awk from the IRIS Seismology 
+% Skill Building Workshop in Summer 2020, of the IRIS Education and 
+% Public Outreach Program, as well as from mcms2evt in 
+% csdms-contrib/slepian_oscar
 % 
-% Last Modified by Yuri Tamama, 10/18/2020
+% Last Modified by Yuri Tamama, 11/08/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('stalalo',[40.34585 -74.65475]);

@@ -1,7 +1,7 @@
 function evttbl=irisevent(eqinfo)
 % 
 % Function to return a table of event parameters for selected earthquakes,
-% within a certain year and magnitude range, using IRIS's event web 
+% within a certain year and magnitude range, using IRIS's fdsnws-event web 
 % service
 % 
 % INPUTS
@@ -36,9 +36,12 @@ function evttbl=irisevent(eqinfo)
 % 
 % References
 % Based off of mcms2evt in csdms-contrib/slepian_oscar
-% Location of Guyot Hall from csdms-contrib/slepian_zero
-% Uses IRIS's event web service
-% Uses IRIS's travel time web service
+% Location of Guyot Hall from guyotphysics.m in csdms-contrib/slepian_zero
+% Uses IRIS's fdsnws-event web service
+% Uses IRIS's traveltime web service
+% Learned how to use awk from the IRIS Seismology Skill Building Workshop 
+% in Summer 2020, of the IRIS Education and Public Outreach Program, as 
+% well as from mcms2evt in csdms-contrib/slepian_oscar
 % 
 % Last Modified by Yuri Tamama, 10/18/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -18,7 +18,8 @@ function fnameout=iriseval(netname,locname,staname,chaname,yrname,jd,...
 %            freqmax : Highest frequency
 %            numfreq : Number of "data points" between the lowest and
 %                      highest frequency
-% fnamein : Name of the RESP file of the seismometer, including the full path
+% fnamein : Name of the .RESP file of the seismometer, including the full 
+%           path
 % measval : In what units do we want the instrument response?
 %           0 : Displacement
 %           1 : Velocity
@@ -26,15 +27,15 @@ function fnameout=iriseval(netname,locname,staname,chaname,yrname,jd,...
 %           3 : Default 
 %
 % OUTPUT
-% fnameout : Name of the data file, containing the
-%            frequency-amplitude-phase response as columns in that order
+% fnameout : Name of the data file, containing the frequency, amplitude
+%            response, and phase response as columns in that order
 % 
 % References
-% Uses IRIS's evalresp program to create the frequency-amplitude 
-% files
+% Uses IRIS's evalresp software to obtain the values of frequency, 
+% amplitude response, and phase response
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 10/27/2020
+% Last Modified by Yuri Tamama, 11/08/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values

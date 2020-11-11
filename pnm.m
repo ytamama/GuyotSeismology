@@ -35,11 +35,15 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,...
 %           Note that we will also create a PNG version of our figure
 %           using the same name
 % 
-% References
+% References:
 % Peterson, J. R. Observations and modeling of seismic background noise. 
 %    http://pubs.er.usgs.gov/publication/ofr93322 (1993). Last Accessed
 %    Nov 4 2020
-% Uses defval.m, shrink.m, figdisp.m, xtraxis.m, from csdms-contrib/slepian_alpha
+% Uses defval.m, shrink.m, figdisp.m, xtraxis.m, from 
+% csdms-contrib/slepian_alpha
+%
+% For more on decibels, see Bormann (2015), Seismic Noise
+% DOI : 10.1007/978-3-642-36197-5_289-1
 %
 % Last Modified by Yuri Tamama, 11/4/2020
 % 
