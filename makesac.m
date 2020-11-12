@@ -41,7 +41,7 @@ function [sacname,mdata,probtime,mmstime,msctime,mdtime]=makesac(evtdate,...
 % mcms2sac, in csdms-contrib/slepian_oscar
 % Accessing SAC from MATLAB is from mcms2mat.m in 
 % csdms-contrib/slepian_oscar
-% Uses readsac.m and dat2jul.m, in csdms-contrib/slepian_oscar
+% Uses readsac.m, dat2jul.m, jul2dat.m, in csdms-contrib/slepian_oscar
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
 % The seismic data are recorded by Nanometrics Meridian PH-120 seismometer,

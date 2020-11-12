@@ -24,7 +24,7 @@ function [backazimuth,azimuth,distdeg,distmtr]=irisazimuth(evlalo,stalalo)
 % References:
 % Location of Guyot Hall from guyotphysics.m in csdms-contrib/slepian_zero
 % Uses defval.m from csdms-contrib/slepian_alpha
-% Uses IRIS's distace-azimuth web service
+% Uses IRIS's distance-azimuth web service
 % Learned how to use grep, sed, and awk from the IRIS Seismology 
 % Skill Building Workshop in Summer 2020, of the IRIS Education and 
 % Public Outreach Program, as well as from mcms2evt in 

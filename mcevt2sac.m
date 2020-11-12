@@ -95,6 +95,7 @@ function corrpieces=mcevt2sac(rowdata,measval,frequency,timeinfo,savedir,...
 %
 % References:
 % Uses the fdsnws-event, distace-azimuth web services of IRIS
+% (see irisevent.m, irisazimuth.m)
 % Learned how to access SAC commands from MATLAB from mcms2mat.m,
 % in csdms-contrib/slepian_oscar
 % Uses dat2jul.m, in csdms-contrib/slepian_oscar

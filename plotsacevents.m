@@ -1,6 +1,6 @@
 function [figurehdls,saccsv]=plotsacevents(makefiles,saccsv,measval,frequency,...
-  magnitudes,years,fastsw,slowsw,staloc,stacode,stalalo,samplefreq,...
-  saveplots,savedir,allorrand)
+  magrange,years,timeorsw,fastsw,slowsw,intend,staloc,stacode,...
+  stalalo,samplefreq,saveplots,savedir,allorrand)
 %
 % Function to plot multiple earthquakes, of a given magnitude and year 
 % range, by calling plotsacdata.m multiple times. In each plot, the 
@@ -21,22 +21,29 @@ function [figurehdls,saccsv]=plotsacevents(makefiles,saccsv,measval,frequency,..
 % frequency : The frequencies to which the data will be filtered during
 %             instrument correction
 %             Default: [0.01 0.02 10.00 20.00] Hz
-% magnitudes : The range of magnitudes of the events we wish to plot, 
-%              entered as a vector of length 2 or as a single value, 
-%              if considering only 1 magnitude value
-%              Default: [7.5 10] (Earthquakes with M>=7.5)
-%              The maximum magnitude between 2017-2019 is 8.2;
+% magrange : The range of magnitudes of the events we wish to plot, 
+%            entered as a vector of length 2 
+%            Default: [7.5 10] (Earthquakes with M>=7.5)
+%            The maximum magnitude between 2017-2019 is 8.2;
 % 
 %              Note: The magnitudes are inclusive on both ends!
 % years : In which year(s) (from 2017-2019) will we look for events? 
 %         Enter a vector if considering multiple years.
 %         Default: 2019
+% timeorsw : Are we defining our plotting time interval (if we want to 
+%            cut it) by a time span or by surface wave velocities?
+%            1 - Time span (in seconds)
+%            2 - Surface wave velocities (km/s)
+%                NOTE: Selecting this option means we are plotting an event
 % fastsw : The upper threshold for surface wave velocity in km/s, marking 
 %          the beginning of the surface wave window
 %          Default: 5 km/s
 % slowsw : The lower threshold for surface wave velocity in km/s, marking
 %          the end of the surface wave window
 %          Default: 2.5 km/s
+% intend : If we want to cut our time interval, at what time, in seconds, 
+%          should we end our time series? 
+%          Default: 1800s
 % staloc : The name of the place/station where the seismic data were
 %          recorded. 
 %          Default: 'Guyot Hall, Princeton University'
@@ -67,23 +74,28 @@ function [figurehdls,saccsv]=plotsacevents(makefiles,saccsv,measval,frequency,..
 % saccsv : A csv file containing the names of the SAC files that were 
 %          plotted
 % 
-% See mcevt2sac.m
-% 
 % References
 % Uses defval.m, in csdms-contrib/slepian_alpha 
+% Guyot Hall latitude and longitude from guyotphysics.m in 
+% csdms-contrib/slepian_zero
+% Uses the result of mcms2evt, in csdms-contrib/slepian_oscar
+% Uses IRIS's distance-azimuth web service (see irisazimuth.m)
+% 
+% For more on SAC, see Helffrich et al., (2013), The Seismic Analysis 
+% Code: a Primer and User's Guide
 %
-%
-% Last Modified by Yuri Tamama, 09/02/2020
+% Last Modified by Yuri Tamama, 09/11/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('makefiles',1);
 defval('saccsv','');
 defval('measval',0);
 defval('frequency',[0.01 0.02 10.00 20.00]); 
-defval('magnitudes',[7.5 10]);
+defval('magrange',[7.5 10]);
 defval('years',2019);
 defval('fastsw',5);
 defval('slowsw',2.5);
+defval('intend',1800);
 defval('staloc','Guyot Hall, Princeton University')
 defval('stacode','PP.S0001')
 defval('stalalo',[40.34585 -74.65475]);
@@ -92,8 +104,8 @@ defval('saveplots',0);
 defval('savedir','');
 defval('allorrand',[]);
 
-% Specify necessary directories for obtaining data - insert your own!
-datadir=getenv('');
+% Specify necessary directories - insert your own!
+datadir=getenv('MC0');
 
 % Search for the events matching the inputted parameters
 years=sort(years,'ascend');
@@ -108,13 +120,10 @@ for i=1:length(years)
   end
 end
 % Select earthquakes with the inputted magnitude(s)
-magnitudes=sort(magnitudes,'ascend');
+magrange=sort(magrange,'ascend');
 mgcol=eqdata.Var6;
-if length(magnitudes)==2
-  eqdata=eqdata(mgcol>=magnitudes(1) & mgcol<=magnitudes(2),:);
-else
-  eqdata=eqdata(mgcol==magnitudes,:);
-end
+eqdata=eqdata(mgcol>=magrange(1) & mgcol<magrange(2),:);
+% Inputted < for today, 8/10/2020, to avoid overlapping events
 numevts=size(eqdata);
 numevts=numevts(1);
 % If randomly selecting events
@@ -130,6 +139,7 @@ end
 % Find how long of an interval we wish to plot for all earthquakes
 maxtime=0;
 maxdist=0;
+% tlens=zeros(numevts,1);
 for i=1:numevts
   if isempty(randinds)
     rowdata=eqdata(i,:);
@@ -147,10 +157,14 @@ for i=1:numevts
     maxdist=distdeg;
   end
   % Time
-  totaltime=round(distkm/slowsw,2);
-  % Maximum time
-  if totaltime>maxtime
-    maxtime=totaltime;
+  if timeorsw==2
+    totaltime=round(distkm/slowsw,2);
+    % Maximum time
+    if totaltime>maxtime
+      maxtime=totaltime;
+    end
+  else
+    maxtime=intend;
   end
 end
 
@@ -172,7 +186,6 @@ if makefiles==1 || isempty(saccsv)
     evtids=[evtids; rowdata.Var1];
     distdegs2=[distdegs2; rowdata.Var7];
     % Cut SAC files based on time when creating event intervals
-    timeorsw=1;
     intend=maxtime+100;
     corrfiles=mcevt2sac(rowdata,measval,timeorsw,intend,frequency);
     priorlenx=length(corrfilesx);
@@ -194,16 +207,16 @@ if makefiles==1 || isempty(saccsv)
   % Put corrected SAC file names in a table, along with event ID and 
   % distance
   sactable=table(evtids,distdegs2,corrfilesx,corrfilesy,corrfilesz);
-  if length(magnitudes)>1
-    if magnitudes(2)>8.2
-      magstr=sprintf('%g+',magnitudes(1));
-    elseif magnitudes(1)<-1.69
-      magstr=sprintf('%g-',magnitudes(2));
+  if length(magrange)>1
+    if magrange(2)>8.2
+      magstr=sprintf('%g+',magrange(1));
+    elseif magrange(1)<-1.69
+      magstr=sprintf('%g-',magrange(2));
     else
-      magstr=sprintf('%gto%g',magnitudes(1),magnitudes(2));
+      magstr=sprintf('%gto%g',magrange(1),magrange(2));
     end
   else
-    magstr=num2str(magnitudes(1));
+    magstr=num2str(magrange(1));
   end
   if length(years)>1
     if years(length(years))-years(1) ~= length(years)-1 
@@ -245,7 +258,6 @@ for i=1:numevts
   sacfiles={zfile;yfile;xfile};
   plotorder=[1 2 3];
   numsubplots=3;
-  labelsw=1;
   plotall=1;
   stalbl=0;
   evtornot=1;
@@ -277,9 +289,19 @@ for i=1:numevts
     return;
   end
   % Plot event and save the plots if desired
-  plotsacdata(soleplot,sacfiles,plotorder,numsubplots,measval,frequency,...
-    stalalo,staloc,stacode,samplefreq,plotall,stalbl,saveplots,...
-    savedir,evtornot,rowdata,fastsw,slowsw,labelsw,plotarrivals)
+  if timeorsw==1
+    plotsw=0;
+    plotsacdata(soleplot,sacfiles,plotorder,numsubplots,measval,frequency,...
+      stalalo,staloc,stacode,samplefreq,plotall,stalbl,saveplots,...
+      savedir,evtornot,rowdata,timeorsw,[],[],intend,plotsw,...
+      plotarrivals)
+  else
+    plotsw=1;
+    plotsacdata(soleplot,sacfiles,plotorder,numsubplots,measval,frequency,...
+      stalalo,staloc,stacode,samplefreq,plotall,stalbl,saveplots,...
+      savedir,evtornot,rowdata,timeorsw,fastsw,slowsw,intend,plotsw,...
+      plotarrivals)
+  end
 
   % Add figure handle to array
   figurehdls=[figurehdls; newfig];
