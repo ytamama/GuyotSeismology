@@ -1,11 +1,10 @@
-function rmsplot=vairmsplot(csvfile,measval,starttime,finaltime,...
+function [rmsplot,figname]=vairmsplot(csvfile,measval,starttime,finaltime,...
   timezone,tzlabel,prclimit,saveplot,savedir,addlegend,adjustplot,...
-  vertlines,vertlinelabs,customtitle,customxlabel,customfigname,lineclr)
+  vertlines,vertlinelabs,customtitle,customxlbl,customfname,lineclr)
 % 
-% Function to plot the time series of RMS weather phenomena
-% See vairmshr.m
-% 
-% Later edit to have plotting functionality for multiple years! 
+% Function to plot the time series of root mean squared (RMS) weather 
+% phenomena
+% See vairmshr.m 
 % 
 % INPUTS
 % csvfile : A csv file, containing the RMS values of the weather data that
@@ -51,10 +50,10 @@ function rmsplot=vairmsplot(csvfile,measval,starttime,finaltime,...
 %                vertical lines.
 % customtitle : Enter a title for the plot, if desired, as a cell array.
 %               Enter an empty cell array to use the default title.
-% customxlabel : Enter a horizontal axis label, if desired, as a string.
-%                Enter an empty string to use the default label.
-% customfigname : Enter a name for the figure, if desired, as a string. 
-%                 Enter an empty string to use the default name.
+% customxlbl : Enter a horizontal axis label, if desired, as a string.
+%              Enter an empty string to use the default label.
+% customfname : Enter a name for the figure, if desired, as a string. 
+%               Enter an empty string to use the default name.
 % lineclr : The color of the line plot, entered as a string or RGB 
 %           triplet. 
 %           Default: 'r'
@@ -63,11 +62,12 @@ function rmsplot=vairmsplot(csvfile,measval,starttime,finaltime,...
 %
 % OUTPUT
 % rmsplot : The figure handle of the RMS time series
+% figname : The full path name of our saved figure, if saved
 % 
 % References
 % Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 10/14/2020
+% Last Modified by Yuri Tamama, 10/18/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -76,7 +76,6 @@ defval('timezone','UTC')
 defval('tzlabel','UTC')
 defval('prclimit',100)
 defval('saveplot',1);
-% Insert your own directory!
 defval('savedir',pwd);
 defval('adjustplot',0);
 defval('vertlines',[]);
@@ -90,7 +89,7 @@ defval('customfigname','')
 rmsdata=readtable(csvfile,'Delimiter',',');
 rmsvals=rmsdata.outputvec;
 timevec=rmsdata.outputtimes;
-% Convert the time vector, which is in strings, to datetimes
+% Convert the time vector, which consists of strings, to datetime
 timevector=[];
 for i=1:length(timevec)
   nowtime=datetime(timevec{i},...
@@ -116,7 +115,7 @@ for i=1:length(timevector)
   ticktimestr=cellstr(ticktime);
   ticktimestr=strsplit(ticktimestr{1});
   tickdaystr=ticktimestr{1};
-  % Tick marks on the weekend
+  % Tick marks signifying the weekend
   if strcmpi('Saturday',tickdaystr)
     if ticktime.Hour==0 
       ticklabels=vertcat(ticklabels,'S');
@@ -178,11 +177,11 @@ datestr1=sprintf('%s:%s:%s %s, %s %d',datenum2str(startdate.Hour,0),...
   startwkday,monthnames{startdate.Month},startdate.Day);
 datestr2=sprintf('%s:59:59 %s, %s %d',datenum2str(finaldate.Hour,0),...
   finalwkday,monthnames{finaldate.Month},finaldate.Day);
-if isempty(customxlabel)
+if isempty(customxlbl)
   xlabel(sprintf('%s to %s %d (%s)',datestr1,datestr2,startdate.Year,...
     tzlabel)); 
 else
-  xlabel(customxlabel)
+  xlabel(customxlbl)
 end
 
 % Add title
@@ -223,7 +222,7 @@ end
 if saveplot==1
   starthr=datenum2str(starttime.Hour,0);
   endhr=datenum2str(finaltime.Hour,0);
-  if isempty(customfigname)
+  if isempty(customfname)
     if prclimit<100
       figname=sprintf(...
         'RMS%sin%s.%s.%sto%s.%sto%s.%s.btm%s.eps',...
@@ -242,7 +241,7 @@ if saveplot==1
         starthr,endhr,upper(tzlabel));
     end
   else
-    figname=customfigname;
+    figname=customfname;
   end
   figname2=figdisp(figname,[],[],1,[],'epstopdf');
   pause(0.5)
@@ -250,7 +249,7 @@ if saveplot==1
   figname=fullfile(savedir,figname);
   pause(.25)
 else
-  figname='notsaved';
+  figname='';
 end
 
 
