@@ -7,10 +7,10 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 % evttype : What type of event is this plot for? 
 %           0 : Ambient noise
 %           1 : Earthquakes
-%           2 : Campus blasts
+%           2 : Campus blasts 
 % evtinfo : Enter in info about the event as a cell array!
 %           Ambient noise : {freqinfo; measval; header; stacode; 
-%                            staloc}
+%                            staloc; rmoutlier}
 %                            freqinfo : The cell array of the frequencies
 %                                       through which the data are filtered.
 %                                       If we plot multiple sets of SAC 
@@ -22,11 +22,14 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 %                            header : Header of plotted SAC file
 %                            stacode : Network and station code
 %                            staloc : Short description of location
+%                            rmoutlier : 2 element vector for how we remove
+%                                        the outliers from the values
+%                                        plotted (see plotsacdata.m)
 %
 %           Earthquake : {freqinfo; measval; IRIS event ID
 %                         evlalo; magnitude; depth; staloc; stacode; 
 %                         stalalo; distance (degrees); backazimuth; 
-%                         fastsw; slowsw} 
+%                         fastsw; slowsw; rmoutlier} 
 %                         event ID : Event ID of earthquake; enter as a 
 %                                   number
 %                         evlalo : [latitude longitude] of event
@@ -38,7 +41,8 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 %                         slowsw : Slow surface wave speed threshold, if 
 %                                 plotting
 % 
-%           Campus blasts : {freqinfo; measval; header; stacode; staloc}
+%           Campus blasts : {freqinfo; measval; header; stacode; staloc;
+%                           rmoutlier}
 %
 % If any of the values above are unknown, enter an empty array!
 % 
@@ -46,14 +50,14 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 % titlestrs : Cell array containing the title for the plot
 % 
 % References:
-% Uses defval.m, in csdms-contrib/slepian_alpha 
-% Uses dat2jul.m and readsac.m, in csdms-contrib/slepian_oscar
-% Uses char(176) to get the degree symbol, obtained from help
-% forums on www.mathworks.com
+% Referred to MATLAB help forums on www.mathworks.com
 % The lat-lon coordinates of Guyot Hall are from guyotphysics.m, in 
 % csdms-contrib/slepian_zero
+% Uses IRIS's traveltime and distance-azimuth web services
+% (see iristtimes.m, irisazimuth.m)
+% Information about earthquakes is from the IRIS Data Management Center
 % 
-% Last Modified by Yuri Tamama, 10/18/2020
+% Last Modified by Yuri Tamama, 10/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -61,16 +65,18 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 freqinfo=evtinfo{1};
 if ~isempty(freqinfo)
   % Retrieve each frequency range  
-  titlestr4='Filtered to';
+  titlestrf='Filtered to';
   for f=1:length(freqinfo)  
     freqlimits=freqinfo{f};
     freqstr2=sprintf('%.2f',freqlimits(2));
     freqstr3=sprintf('%.2f',freqlimits(3)); 
-    titlestr4=sprintf('%s %s to %s Hz',titlestr4,freqstr2,freqstr3);
+    titlestrf=sprintf('%s %s to %s Hz',titlestrf,freqstr2,freqstr3);
     if f<length(freqinfo)
-      titlestr4=sprintf('%s;',titlestr4);
+      titlestrf=sprintf('%s;',titlestrf);
     end    
   end   
+else
+  titlestrf='';
 end
 %
 measval=evtinfo{2};
@@ -96,11 +102,12 @@ if evttype==1
   % (degrees), computed using IRIS's travel time web service. Otherwise, 
   % (i.e. if the earthquake occurs "above ground"), then this is the 
   % geoid distance from station to event (degrees), computed using IRIS's
-  % distaz web service
+  % distance-azimuth web service
   distdeg=evtinfo{10};
   backazimuth=evtinfo{11};
   fastsw=evtinfo{12};
   slowsw=evtinfo{13};
+  rmoutlier=evtinfo{14};
   
   % Calculate values or replace with default vallues, if necessary
   if isempty(staloc)
@@ -145,25 +152,24 @@ if evttype==1
   titlestr3=sprintf('%s at %s (%s)',vallabel,staloc,...
     replace(stacode,'.',' '));
   if ~isempty(fastsw) && ~isempty(slowsw)
-    titlestr5=sprintf(...
+    titlestrsw=sprintf(...
       'Upper (%g km/s) and Lower (%g km/s) Surface Wave Speeds in Magenta',...
       fastsw,slowsw);
-    if ~isempty(freqinfo)
-      titlestrs={titlestr1;titlestr2;titlestr3;titlestr4;titlestr5};
-      return
+  else
+    titlestrsw='';
+  end
+  if ~isempty(rmoutlier)
+    if rmoutlier(1)==0
+      titlestrrm=sprintf('Bottom %g%% per File',rmoutlier(2));
     else
-      titlestrs={titlestr1;titlestr2;titlestr3;titlestr5};
-      return
+      titlestrrm=sprintf('No signals +/- %.2f MAD from the median',rmoutlier(2));
     end
   else
-    if ~isempty(freqinfo)
-      titlestrs={titlestr1;titlestr2;titlestr3;titlestr4};
-      return
-    else
-      titlestrs={titlestr1;titlestr2;titlestr3};
-      return
-    end
+    titlestrrm='';
   end
+  titlestrall={titlestr1;titlestr2;titlestr3;titlestrf;titlestrsw;...
+    titlestrrm};
+
 % Non-earthquake
 else
   header=evtinfo{3};
@@ -187,22 +193,21 @@ else
   % Campus blast
   if evttype==2
     titlestrb='Campus Blast';
-    if ~isempty(freqinfo)
-      titlestrs={titlestrb;titlestr1;titlestr2;titlestr4};
-      return
-    else
-      titlestrs={titlestrb;titlestr1;titlestr2};
-      return
-    end
+    titlestrall={titlestrb;titlestr1;titlestr2;titlestrf};
   % Ambient noise
   else
-    if ~isempty(freqinfo)
-      titlestrs={titlestr1;titlestr2;titlestr4};
-      return
-    else
-      titlestrs={titlestr1;titlestr2};
-      return
-    end
+    titlestrall={titlestr1;titlestr2;titlestrf};
   end
 end
+
+% Get rid of what strings are empty
+titlestrs={};
+for i=1:length(titlestrall)
+  teststr=titlestrall{i};
+  if ~isempty(teststr)
+    titlestrs=vertcat(titlestrs,teststr);
+  end
+end
+
+
 

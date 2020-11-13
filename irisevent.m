@@ -37,8 +37,8 @@ function evttbl=irisevent(eqinfo)
 % References
 % Based off of mcms2evt in csdms-contrib/slepian_oscar
 % Location of Guyot Hall from guyotphysics.m in csdms-contrib/slepian_zero
-% Uses IRIS's fdsnws-event web service
-% Uses IRIS's traveltime web service
+% Uses IRIS's fdsnws-event, traveltime, and distance-azimuth web services
+% (see iristtimes.m, irisazimuth.m)
 % Learned how to use awk from the IRIS Seismology Skill Building Workshop 
 % in Summer 2020, of the IRIS Education and Public Outreach Program, as 
 % well as from mcms2evt in csdms-contrib/slepian_oscar

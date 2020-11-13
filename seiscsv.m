@@ -118,12 +118,15 @@ function [seistbls,seiscsvs]=seiscsv(csvfiles,timeinfo,avgmode,measval,...
 % seiscsvs : The names of the CSV file(s), containing the tabular data
 % 
 % References
-% Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
+% Uses defval.m in csdms-contrib/slepian_alpha 
 % These time-based categories are based off of those used in 
 % Groos and Ritter (2009).
+% This routine is inspired by 
+% Lecocq et al., (2020), DOI: 10.1126/science.abd2438
+% and
+% SeismoRMS, by Thomas Lecocq et. al.,
+% https://github.com/ThomasLecocq/SeismoRMS
 %
-% See guyotrmsseishr.m, seiscsvplot.m
-% 
 % Last Modified by Yuri Tamama, 10/26/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -344,6 +347,7 @@ end
 firstind=1;
 calcprc=0;
 prcind=1;
+intstr='';
 for f=1:length(csvfiles)
   csvfile=csvfiles{f};
   data=readtable(csvfile,'Delimiter',',');
@@ -368,6 +372,9 @@ for f=1:length(csvfiles)
   end
   monthname=month(testtime,'name');
   monthname=monthname{1};
+  if f>1 && f<length(csvfiles)
+    intstr=strcat(intstr,monthname(1));
+  end
   % If this month is the "first" of its series (e.g. when comparing
   % February - May of 2018-2020, and we just went through the Februaries 
   % already), mark it!
@@ -906,18 +913,23 @@ startymd=sprintf('%d%s%s',starttime.Year,datenum2str(starttime.Month,0),...
   datenum2str(starttime.Day,0));
 finalymd=sprintf('%d%s%s',fintime.Year,datenum2str(fintime.Month,0),...
   datenum2str(fintime.Day,0));
+% Today's date
+todaytime=datetime('now');
+todaytime.TimeZone='America/New_York';
+todayymd=sprintf('%d%s%s',todaytime.Year,datenum2str(...
+  todaytime.Month,0),datenum2str(todaytime.Day,0));
 % CSV file name(s)
 if timeinfo==1
-  compstr='moncomp';
+  compstr='mon';
 else
-  compstr='yrcomp';
+  compstr='yr';
 end
-seiscsv=sprintf('RMS%sinNM_Avg%d_%s_%sto%s_%s_%s%s%s%s.csv',...
-  vallbls{measval+1},avgmode,compstr,startymd,finalymd,tzlabel,freqstr1,...
-  freqstr2,freqstr3,freqstr4);
-seiscsvprc=sprintf('RMS%sinNM_MeanPrcChg_Avg%d_%s_%sto%s_%s_%s%s%s%s.csv',...
-  vallbls{measval+1},avgmode,compstr,startymd,finalymd,tzlabel,freqstr1,...
-  freqstr2,freqstr3,freqstr4);
+seiscsv=sprintf('RMS%sinNM_Avg%d_%s_%sto%sto%s_%s_%s_%s%s%s%s.csv',...
+  vallbls{measval+1},avgmode,compstr,startymd,intstr,finalymd,todayymd,tzlabel,...
+  freqstr1,freqstr2,freqstr3,freqstr4);
+seiscsvprc=sprintf('RMS%sinNM_MeanPrcChg_Avg%d_%s_%sto%sto%s_%s_%s_%s%s%s%s.csv',...
+  vallbls{measval+1},avgmode,compstr,startymd,intstr,finalymd,todayymd,tzlabel,...
+  freqstr1,freqstr2,freqstr3,freqstr4);
 
 % Concatenate the Z and H data
 csvlbls=vertcat(csvlblsz,csvlblsh);
@@ -1085,7 +1097,7 @@ end
 if makeplots==1 && length(csvfiles)>1
   startstrs=csvlbls{1};
   startstrs=strsplit(startstrs,'_');
-  if timeinfo==1
+  if timeinfo==2
     startstr=sprintf('%s %s',startstrs{2},startstrs{1});
   else
     startstr=startstrs{1};

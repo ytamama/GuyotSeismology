@@ -18,34 +18,36 @@ function colorvec=pscolorcode(inputval,colorcode)
 % Use of colormap, including how to adjust for the number of colors in 
 % the colormap, from MATLAB help forums
 % 
-% Last Modified by Yuri Tamama, 07/31/2020
+% Last Modified by Yuri Tamama, 09/04/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Prepare relevant colormaps
 if colorcode==1
-  cmap=colormap(jet(11));
-  if inputval<-1
+  cmap=colormap(jet(12));
+  if inputval<=-1
     colorvec=cmap(1,:);
-  elseif inputval<0
+  elseif inputval<=0
     colorvec=cmap(2,:);
-  elseif inputval<1
+  elseif inputval<=1
     colorvec=cmap(3,:);
-  elseif inputval<2
+  elseif inputval<=2
     colorvec=cmap(4,:);
-  elseif inputval<3
+  elseif inputval<=3
     colorvec=cmap(5,:);
-  elseif inputval<4
+  elseif inputval<=4
     colorvec=cmap(6,:);
-  elseif inputval<5
+  elseif inputval<=5
     colorvec=cmap(7,:);
-  elseif inputval<6
+  elseif inputval<=6
     colorvec=cmap(8,:);
-  elseif inputval<7
+  elseif inputval<=7
     colorvec=cmap(9,:);
-  elseif inputval<8
+  elseif inputval<=8
     colorvec=cmap(10,:);
-  else
+  elseif inputval<=9
     colorvec=cmap(11,:);
+  else
+    colorvec=cmap(12,:);
   end 
 elseif colorcode==2
   cmap=colormap(jet(14));

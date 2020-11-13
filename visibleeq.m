@@ -3,8 +3,8 @@ function figurehdl=visibleeq(csvfile,measval,frequency,magrange,cmaptype,...
 %
 % Function to plot a magnitude vs. epicentral scatterplot of earthquakes 
 % catalogued by IRIS, each color-coded to indicate whether or not 
-% the Meridian Compact seismometer at Guyot Hall, Princeton University
-% can detect it. 
+% the Nanometrics Meridian PH-120 seismometer at Guyot Hall can detect
+% it.
 % 
 % INPUTS
 % csvfile : A CSV file containing the IRIS Event ID, magnitude, and 
@@ -44,17 +44,16 @@ function figurehdl=visibleeq(csvfile,measval,frequency,magrange,cmaptype,...
 % figurehdl : The figure handle of the plot generated
 %
 % References: 
-% Uses defval.m in csdms-contrib/slepian_alpha 
-%
+% Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
 % Use of colormap, including how to adjust for the number of colors in 
 % the colormap, from MATLAB help forums
-%
-% Frohlich, C. "The Nature of Deep-Focus Earthquakes," 1989
+% Uses files outputted by mcms2evt, in csdms-contrib/slepian_oscar
+% Information about earthquakes is from the IRIS Data Management Center
 %
 % Last Modified by Yuri Tamama, 09/03/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Specify important directory to obtain seismic data
-datadir=getenv('');
+% Specify important directory
+datadir=getenv('MC0');
 
 % Set default values
 defval('measval',0);
@@ -269,7 +268,7 @@ else
   magstr='allM';
   titlestr1=sprintf('Earthquake %s Signals Detected',vallabel);
 end
-titlestr2='by the Meridian Compact PH1 0248 Seismometer (PP S0001)';
+titlestr2='by the Meridian Compact PH1 0248 Seismometer';
 titlestr3='Stationed at Guyot Hall, Princeton University';
 % Frequency and period
 freqstr1=sprintf('%g',frequency(1));

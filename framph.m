@@ -45,7 +45,7 @@ function [fafig,fpfig]=framph(fname,measval,yrname,jd,staname,netname,...
 % For more on decibels, see Bormann (2015), Seismic Noise
 % DOI : 10.1007/978-3-642-36197-5_289-1
 % 
-% Last Modified by Yuri Tamama, 11/9/2020
+% Last Modified by Yuri Tamama, 11/12/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -157,8 +157,8 @@ end
 
 % Plot the frequency-phase response
 fpfig=figure();
-fafig.Units='normalized';
-fafig.OuterPosition(4)=.92;
+fpfig.Units='normalized';
+fpfig.OuterPosition(4)=.92;
 ax2=gca;
 % Scale the figure
 ax2.Position(4)=.65;

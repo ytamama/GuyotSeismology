@@ -8,8 +8,8 @@ function [seishdls,saccsv]=pseudorsec(makefiles,saccsv,...
 % distance to the station. In these plots, the surface wave windows 
 % and the P and S arrivals will be labeled.
 %
-% The data for this plot are from the S0001 seismometer, situated in 
-% Guyot Hall as part of the PP network.
+% The data for this plot are from a Nanometrics Meridian PH-120 seismometer
+% in Guyot Hall, Princeton University
 % 
 % INPUTS
 % makefiles : Do we need to make SAC files of these events?
@@ -18,11 +18,6 @@ function [seishdls,saccsv]=pseudorsec(makefiles,saccsv,...
 % saccsv : The name of a CSV file containing the names of the existing
 %          SAC files, if applicable. Enter an empty string if not
 %          applicable. 
-%          Note: The same CSV file can be used for plotsacevents.m
-%          Note 2: If you have a CSV file that was made for another set of 
-%          surface wave velocities, you can still use it as long as the 
-%          lower velocity is less than or equal to the new one you plan 
-%          to test.
 %          Default: ''
 % measval : Are we plotting displacement, velocity, or acceleration?
 %           0 for displacement in nm (default)
@@ -87,9 +82,15 @@ function [seishdls,saccsv]=pseudorsec(makefiles,saccsv,...
 % 
 % References
 % Uses defval.m, in csdms-contrib/slepian_alpha 
-%
+% Uses readsac.m, in csdms-contrib/slepian_oscar
 % Use of colormap, including how to adjust for the number of colors in 
 % the colormap, from MATLAB help forums
+% Guyot Hall latitude and longitude from guyotphysics.m in 
+% csdms-contrib/slepian_zero
+% Uses files outputted by mcms2evt, in csdms-contrib/slepian_oscar
+% Information about earthquakes is from the IRIS Data Management Center
+% Uses the traveltime, distace-azimuth web services of IRIS
+% (see iristtimes.m, irisazimuth.m)
 %
 % Last Modified by Yuri Tamama, 08/13/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,8 +111,8 @@ defval('plotevtids',0);
 defval('saveplots',0);
 defval('savedir','');
 
-% Specify necessary directories to get data - insert your own!
-datadir=getenv('');
+% Specify necessary directories - insert your own!
+datadir=getenv('MC0');
 
 % Search for the events matching the inputted parameters
 years=sort(years,'ascend');
