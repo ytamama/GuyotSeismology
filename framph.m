@@ -45,7 +45,7 @@ function [fafig,fpfig]=framph(fname,measval,yrname,jd,staname,netname,...
 % For more on decibels, see Bormann (2015), Seismic Noise
 % DOI : 10.1007/978-3-642-36197-5_289-1
 % 
-% Last Modified by Yuri Tamama, 11/12/2020
+% Last Modified by Yuri Tamama, 11/28/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -170,6 +170,7 @@ hold on
 ax2.YLim=[.9*min(phases) 1.1*max(phases)];
 ax2.XLim=[min(freqs) max(freqs)];
 ax2.XTick=[0.0001 0.01 1 1e2];
+ax2.YTick=[45 90 135 180 225 270 315];
 ax2.XScale='log';
 ax2.YScale='linear';
 ax2.XLabel.String='Frequency (Hz)';
