@@ -28,10 +28,14 @@ function rfiles=rotsac(fnames,hdrinfo)
 %          tfile : Transverse component SAC file
 %
 % References
-% Uses SAC comamnds, found in the SAC manual
+% Uses SAC commands, found in the SAC manual
 % Referred to the SAC tutorial by Zhigang Peng
-% Calling SAC from MATLAB from mcms2mat.m in csdms-contrib/slepian_oscar
+% Learned how to use SAC from MATLAB from mcms2mat.m in 
+% csdms-contrib/slepian_oscar
 % Uses defval.m, in csdms-contrib/slepian_alpha
+%
+% For more on SAC, see Helffrich et al., (2013), The Seismic Analysis 
+% Code: a Primer and User's Guide
 % 
 % Last Modified by Yuri Tamama, 09/28/2020
 %
