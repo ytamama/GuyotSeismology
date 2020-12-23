@@ -67,7 +67,7 @@ function [rmsplot,figname]=vairmsplot(csvfile,measval,starttime,finaltime,...
 % References
 % Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 10/18/2020
+% Last Modified by Yuri Tamama, 12/22/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -92,7 +92,7 @@ timevec=rmsdata.outputtimes;
 % Convert the time vector, which consists of strings, to datetime
 timevector=[];
 for i=1:length(timevec)
-  nowtime=datetime(timevec{i},...
+  nowtime=datetime(timevec(i),...
     'InputFormat','eeee dd-MMM-uuuu HH:mm:ss');
   % The time values are in the inputted time zone!  
   nowtime.TimeZone=timezone;
