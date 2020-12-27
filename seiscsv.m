@@ -127,7 +127,7 @@ function [seistbls,seiscsvs]=seiscsv(csvfiles,timeinfo,avgmode,measval,...
 % SeismoRMS, by Thomas Lecocq et. al.,
 % https://github.com/ThomasLecocq/SeismoRMS
 %
-% Last Modified by Yuri Tamama, 10/26/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Default values
