@@ -45,7 +45,7 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,...
 % For more on decibels, see Bormann (2015), Seismic Noise
 % DOI : 10.1007/978-3-642-36197-5_289-1
 %
-% Last Modified by Yuri Tamama, 11/4/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
