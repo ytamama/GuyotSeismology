@@ -92,7 +92,7 @@ function [seishdls,saccsv]=pseudorsec(makefiles,saccsv,...
 % Uses the traveltime, distace-azimuth web services of IRIS
 % (see iristtimes.m, irisazimuth.m)
 %
-% Last Modified by Yuri Tamama, 08/13/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('makefiles',1);
