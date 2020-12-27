@@ -84,7 +84,7 @@ function figurehdls=seiscsvplot(csvfile,timeinfo,startstr,avgmode,...
 %
 % See guyotrmsseishr.m, seiscsv.m
 % 
-% Last Modified by Yuri Tamama, 10/28/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
