@@ -121,7 +121,7 @@ function [outputtbl,figurehdl]=vaivseisrms(csvfile1,measval1,frequency,...
 % https://github.com/ThomasLecocq/SeismoRMS, as well as 
 % Lecocq et al., (2020), DOI: 10.1126/science.abd2438
 %
-% Last Modified by Yuri Tamama, 11/2/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
