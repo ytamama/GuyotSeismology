@@ -50,7 +50,7 @@ function figurehdl=visibleeq(csvfile,measval,frequency,magrange,cmaptype,...
 % Uses files outputted by mcms2evt, in csdms-contrib/slepian_oscar
 % Information about earthquakes is from the IRIS Data Management Center
 %
-% Last Modified by Yuri Tamama, 09/03/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Specify important directory
 datadir=getenv('MC0');
