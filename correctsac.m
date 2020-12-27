@@ -48,12 +48,10 @@ function correctedsac=correctsac(sacfiles,measval,frequency,respfile)
 % by Helffrich et al., 2013
 % 
 % The facilities of IRIS Data Services, specifically the RESP web service, 
-% were used for this code. IRIS Data Services are funded through the 
-% Seismological Facilities for the Advancement of Geoscience (SAGE) Award 
-% of the National Science Foundation under Cooperative Support Agreement
-% EAR-1851048.
-% 
-% Last Modified by Yuri Tamama, 11/04/2020
+% were used for this code.  
+%  
+%  
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
