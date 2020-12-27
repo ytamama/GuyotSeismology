@@ -57,7 +57,7 @@ function titlestrs=sacplottitle(evttype,evtinfo)
 % (see iristtimes.m, irisazimuth.m)
 % Information about earthquakes is from the IRIS Data Management Center
 % 
-% Last Modified by Yuri Tamama, 10/27/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
