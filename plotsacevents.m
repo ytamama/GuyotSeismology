@@ -84,7 +84,7 @@ function [figurehdls,saccsv]=plotsacevents(makefiles,saccsv,measval,frequency,..
 % For more on SAC, see Helffrich et al., (2013), The Seismic Analysis 
 % Code: a Primer and User's Guide
 %
-% Last Modified by Yuri Tamama, 09/11/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('makefiles',1);
