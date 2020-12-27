@@ -18,7 +18,7 @@ function locationstr=irisevtloc(evtid)
 % in Summer 2020, of the IRIS Education and Public Outreach Program, as 
 % well as from mcms2evt in csdms-contrib/slepian_oscar
 % 
-% Last Modified by Yuri Tamama, 08/13/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
