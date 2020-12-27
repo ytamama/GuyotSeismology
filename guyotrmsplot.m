@@ -184,7 +184,7 @@ function [rmsplot,axeshdl,figname]=guyotrmsplot(csvfiles,...
 % Groos & Ritter, 2009, DOI: 10.1111/j.1365-246X.2009.04343.x
 % Ash, 2018 (Junior Paper of Princeton University's Geosciences Department)
 % 
-% Last Modified by Yuri Tamama, 10/26/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set Default Values
@@ -313,7 +313,7 @@ for i=1:4
     timevec=data.outputtimes;
     % Set up RMS cells to store data and times, as the data might be 
     % different lengths
-    timevec=datetime(timevec,'InputFormat','eeee dd-MMM-uuuu HH:mm:ss');
+%     timevec=datetime(timevec,'InputFormat','eeee dd-MMM-uuuu HH:mm:ss');
     if rmstype<2
       timevec.TimeZone=tzone;
     else
