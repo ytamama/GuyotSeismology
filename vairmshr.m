@@ -79,7 +79,7 @@ function [outputtbl,csvfile,wrdcsv,mdcsv]=vairmshr(measval,starttime,...
 % forums on www.mathworks.com
 % See guyotweather.m in csdms-contrib/slepian_oscar
 %
-% Last Modified by Yuri Tamama, 10/29/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default value
