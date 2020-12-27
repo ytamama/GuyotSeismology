@@ -105,7 +105,7 @@ function [outputtbl,csvfile,probtimes,mmstimes,msctimes,mdtimes]=guyotrmsseishr(
 % https://github.com/ThomasLecocq/SeismoRMS, as well as 
 % Lecocq et al., (2020), DOI: 10.1126/science.abd2438
 % 
-% Last Modified by Yuri Tamama, 11/6/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
