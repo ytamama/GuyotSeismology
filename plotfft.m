@@ -66,7 +66,7 @@ function figurehdl=plotfft(sacbundle,plotorder,samplefreq,winlen,...
 % Trick to switching between existing subplots is from MATLAB help
 % forums online
 %
-% Last Modified by Yuri Tamama, 08/20/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 staloc='Guyot Hall, Princeton University';
