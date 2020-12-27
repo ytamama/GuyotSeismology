@@ -1,5 +1,5 @@
-function [timevector,outputz,outputy,outputx]=alignrmstimes(...
-  timecell,inputyrs,inputz,inputy,inputx)
+function [timevector,outputz,outputy,outputx,outputh]=alignrmstimes(...
+  timecell,inputyrs,inputz,inputy,inputx,inputh)
 %
 % Function to align the RMS ground displacement/velocity/acceleration, 
 % computed for a number of years between 2017-2020. This is so the same
@@ -19,17 +19,26 @@ function [timevector,outputz,outputy,outputx]=alignrmstimes(...
 % timecell : A cell containing strings representing the times when the 
 %           RMS displacement/velocity/acceleration were computed for 
 %           each inputted year, in order of ascending year.
+% 
+%            A cell containing vectors containing the times when the 
+%            RMS displacement/velocity/acceleration were computed for 
+%            each inputted year, in order of ascending year. This should
+%            have anywhere between 1-4 time vectors! 
 % inputyrs : A vector listing the years over which the RMS values were
 %            computed
 % inputz : A cell containing the RMS displacement/velocity/acceleration
 %          vectors in the Z (vertical) component, listed in order of 
 %          ascending year. 
 % inputy : A cell containing the RMS displacement/velocity/acceleration
-%          vectors in the Z (North-South) component, listed in order of 
+%          vectors in the Y (North-South) component, listed in order of 
 %          ascending year.
 % inputx : A cell containing the RMS displacement/velocity/acceleration
-%          vectors in the Z (East-West) component, listed in order of 
+%          vectors in the X (East-West) component, listed in order of 
 %          ascending year.
+% inputh : A cell containing the RMS displacement/velocity/acceleration
+%          vectors in the horizontal component, listed in order of 
+%          ascending year. Leave empty if we only want the X and Y 
+%          components
 % 
 % OUTPUTS
 % timevector : A vector listing the dates and times, including weekdays, 
@@ -43,12 +52,16 @@ function [timevector,outputz,outputy,outputx]=alignrmstimes(...
 % outputx : A matrix listing the RMS displacement/velocity/acceleration 
 %           in the X (East-West) component, where each row corresponds
 %           to the same weekday.
+% outputh : A matrix listing the RMS displacement/velocity/acceleration 
+%           in the horizontal component, where each row corresponds
+%           to the same weekday. This will be an empty array if we do not
+%           input an inputh vector
 %
 % References
 % Conversion from a datetime array to a cell array is a method I 
 % learned from www.mathworks.com help forums
 % 
-% Last Modified by Yuri Tamama, 09/02/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Identify which year was most recently plotted;
@@ -56,29 +69,46 @@ allyrs=[2017 2018 2019 2020];
 yrindex=[1 2 3 4];
 recentyr=inputyrs(length(inputyrs));
 recentind=yrindex(allyrs==recentyr);
+% Vector of datetimes in the most recent year
 recenttimes=timecell{recentind};
-oldestyr=inputyrs(1);
-oldestind=yrindex(allyrs==oldestyr);
-oldesttimes=timecell{oldestind};
-numtimes=length(oldesttimes);
-
-% Identify the first weekday
+% oldestyr=inputyrs(1);
+% oldestind=yrindex(allyrs==oldestyr);
+% oldesttimes=timecell{oldestind};
+% numtimes=length(oldesttimes);
+% Identify the first weekday in the most recent year
+recenttimes.Format='eeee dd-MMM-uuuu HH:mm:ss';
 firstday=recenttimes(1);
+firstday=cellstr(firstday);
 firstday=strsplit(firstday{1});
 firstwkday=firstday{1};
 
-% Iterate through the years and find the first index with the year
+% Iterate through the years and find the first index with the same
+% weekday
+% Also find which year has the shortest data vector, so we cut the data
+% vectors for all years to the same length! 
 startindices=zeros(4,1);
 startindices(recentind)=1;
+minlen=-1;
 for i=1:4
   if i==recentind
     continue;
   else
     if ismember(allyrs(i),inputyrs)
       timevec=timecell{i};
-      for j=1:numtimes
+      timevec.Format='eeee dd-MMM-uuuu HH:mm:ss';
+      % Find shortest vector
+      if minlen<0
+        minlen=length(timevec);
+      else
+        if length(timevec)<minlen
+          minlen=length(timevec);
+        end
+      end
+      % Find the first matching weekday as the most recent year
+      for j=1:min(length(timevec),length(recenttimes))
         temptime=timevec(j);
-        temptimestr=strsplit(temptime{1});
+        temptimestr=cellstr(temptime);
+        temptimestr=strsplit(temptimestr{1});
         tempwkday=temptimestr{1};
         if strcmpi(tempwkday,firstwkday)
           startindices(i)=j;
@@ -94,49 +124,34 @@ end
 % that by figuring out where to cut the data vectors so they will end up
 % with the same length!
 latestart=max(startindices);
-cutvals=1:length(latestart:numtimes);
+cutvals=1:length(latestart:minlen);
 
 % Align and cut the data vectors!
-timevec1=timecell{1};
-timevec1=timevec1(startindices(1):length(timevec1));
-timevec1=timevec1(cutvals);
-timevec2=timecell{2};
-timevec2=timevec2(startindices(2):length(timevec2));
-timevec2=timevec2(cutvals);
-timevec3=timecell{3};
-timevec3=timevec3(startindices(3):length(timevec3));
-timevec3=timevec3(cutvals);
-timevec4=timecell{4};
-timevec4=timevec4(startindices(4):length(timevec4));
-timevec4=timevec4(cutvals);
-
-timestrings=recenttimes(cutvals);
+timevector=recenttimes(cutvals);
 outputx=zeros(length(cutvals),4);
 outputy=zeros(length(cutvals),4);
 outputz=zeros(length(cutvals),4);
+if ~isempty(inputh)
+  outputh=zeros(length(cutvals),4);   
+else
+  outputh=[];  
+end    
 for i=1:4
   if startindices(i)>0
     % Z
     modz=inputz{i};
-    modz=modz(startindices(i):length(modz));
-    outputz(:,i)=modz(cutvals);
+    outputz(:,i)=modz(startindices(i):length(cutvals)+startindices(i)-1);
     % Y
     mody=inputy{i};
-    mody=mody(startindices(i):length(mody));
-    outputy(:,i)=mody(cutvals);    
+    outputy(:,i)=mody(startindices(i):length(cutvals)+startindices(i)-1); 
     % X
     modx=inputx{i};
-    modx=modx(startindices(i):length(modx));
-    outputx(:,i)=modx(cutvals);
+    outputx(:,i)=modx(startindices(i):length(cutvals)+startindices(i)-1);
+    % H
+    if ~isempty(inputh)
+      modh=inputh{i};
+      outputh(:,i)=modh(startindices(i):length(cutvals)+startindices(i)-1);
+    end    
   end
 end
-
-% Convert the time strings in timevector to datetime objects!
-timevector=[];
-for i=1:length(timestrings)
-  nowtimestr=timestrings{i};
-  nowtime=datetime(nowtimestr,'InputFormat','eeee dd-MMM-uuuu HH:mm:ss');
-  timevector=[timevector; nowtime];
-end
-
 
