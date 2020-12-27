@@ -35,7 +35,7 @@ function fnameout=iriseval(netname,locname,staname,chaname,yrname,jd,...
 % amplitude response, and phase response
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 11/08/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
