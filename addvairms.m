@@ -47,7 +47,7 @@ function [lgdstr,titlestr,wthrname]=addvairms(csvfile,measval,starttime,...
 % 
 % See guyotrmsseishr.m, guyotrmsplot.m, vairmshr.m
 %
-% Last Modified by Yuri Tamama, 11/04/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
