@@ -30,7 +30,7 @@ function [backazimuth,azimuth,distdeg,distmtr]=irisazimuth(evlalo,stalalo)
 % Public Outreach Program, as well as from mcms2evt in 
 % csdms-contrib/slepian_oscar
 % 
-% Last Modified by Yuri Tamama, 11/08/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
 defval('stalalo',[40.34585 -74.65475]);
