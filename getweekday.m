@@ -9,7 +9,7 @@ function weekdayname=getweekday(datetimeobj)
 % OUTPUT
 % weekdayname : A string, for the name of the corresponding weekday
 % 
-% Last Modified by Yuri Tamama, 07/17/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
