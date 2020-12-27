@@ -54,7 +54,7 @@ function [newtimevec,outputz,outputy,outputx,outputh]=cutrmsdata(...
 % Reference
 % Uses defval.m, in csdms-contrib/slepian_alpha 
 %
-% Last Modified by Yuri Tamama, 11/04/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 defval('timezone','UTC')
 
