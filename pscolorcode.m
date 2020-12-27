@@ -18,7 +18,7 @@ function colorvec=pscolorcode(inputval,colorcode)
 % Use of colormap, including how to adjust for the number of colors in 
 % the colormap, from MATLAB help forums
 % 
-% Last Modified by Yuri Tamama, 09/04/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Prepare relevant colormaps
