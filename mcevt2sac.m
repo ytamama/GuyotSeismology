@@ -107,7 +107,7 @@ function corrpieces=mcevt2sac(rowdata,measval,frequency,timeinfo,savedir,...
 % For more on SAC, see Helffrich et al., (2013), The Seismic Analysis 
 % Code: a Primer and User's Guide
 % 
-% Last Modified by Yuri Tamama, 10/27/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 % See mstime2sac.m, makesac.m, plotsacdata.m, irisevent.m, irisazimuth.m, 
 % rotsac.m 
