@@ -18,7 +18,7 @@ function datenumstr=datenum2str(datenumber,jdornot)
 % References:
 % Uses defval.m in csdms-contrib/slepian_alpha
 % 
-% Last modified by Yuri Tamama, 06/04/2020
+% Last modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
