@@ -67,7 +67,7 @@ function [rmsplot,figname]=vairmsplot(csvfile,measval,starttime,finaltime,...
 % References
 % Uses defval.m, figdisp.m in csdms-contrib/slepian_alpha 
 % 
-% Last Modified by Yuri Tamama, 12/22/2020
+% Last Modified by Yuri Tamama, 12/27/2020
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
@@ -116,21 +116,24 @@ for i=1:length(timevector)
   ticktimestr=strsplit(ticktimestr{1});
   tickdaystr=ticktimestr{1};
   % Tick marks signifying the weekend
-  if strcmpi('Saturday',tickdaystr)
-    if ticktime.Hour==0 
-      ticklabels=vertcat(ticklabels,'S');
-      ticksat=[ticksat;ticktime];
-    end
-  elseif strcmpi('Monday',tickdaystr)
-    if ticktime.Hour==0
-      ticksat=[ticksat; ticktime];   
-      ticklabels=vertcat(ticklabels,'S'); 
-    end
-  end
+%   if strcmpi('Saturday',tickdaystr)
+%     if ticktime.Hour==0 
+%       ticklabels=vertcat(ticklabels,'S');
+%       ticksat=[ticksat;ticktime];
+%     end
+%   elseif strcmpi('Monday',tickdaystr)
+%     if ticktime.Hour==0
+%       ticksat=[ticksat; ticktime];   
+%       ticklabels=vertcat(ticklabels,'S'); 
+%     end
+%   end
 end
 
 % Plot the data!
 rmsplot=figure();
+rmsplot.Units='normalized';
+rmsplot.OuterPosition(1)=.15;
+rmsplot.OuterPosition(3)=.75;
 legendstrs={};
 plotline=plot(timevector,rmsvals);
 legendstrs=vertcat(legendstrs,num2str(starttime.Year));
