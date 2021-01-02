@@ -11,14 +11,14 @@ freqinfo=[10^-4,100,1000];
 measval=0;
 components={'Z';'Y';'X'};
 saveplot=1;
-% Choose your own directory to save your figures
+% Insert your own directories!
 savedir=fullfile(pwd,'figures');
-respfmt='PP.S0001.00.HH%s.resp';
-respfmt=fullfile(getenv('RESP'),respfmt);
+respfile='PP.S0001.00.HHZ.resp';
+respfile=fullfile(getenv('RESP'),respfile);
 yrname=2020;
 chaname='HHZ';
 fname20=iriseval(netname,locname,staname,chaname,yrname,jd,...
-  freqinfo,fnameinz,measval);
+  freqinfo,respfile,measval);
 % Move the data file to the /datafiles/ directory
 [status,cmdout]=system(sprintf('mv %s datafiles',fname20));
 datadir=fullfile(pwd,'datafiles');
