@@ -10,7 +10,12 @@
 % "visibility" of each one in a file formatted similarly to 
 % visibleearthquakes_0.010.021020.csv
 
+% Directories to get data and save the figures
+datadir=fullfile(pwd,'datafiles');
+savedir=fullfile(pwd,'figures');
+
 csvfile='visibleearthquakes_0.010.021020.csv';
+csvfile=fullfile(datadir,csvfile);
 % The earthquakes were plotted in displacement
 measval=0;
 % Signals filtered from 0.02 to 10 Hz
@@ -22,8 +27,6 @@ customfigname='';
 % Categorize earthquakes as "shallow," "intermediate," or "deep"
 cmaptype=2;
 saveplot=1;
-% Insert your own directory to save the figure!
-savedir=fullfile(pwd,'figures');
 %
 figurehdl=visibleeq(csvfile,measval,frequency,magrange,cmaptype,...
   saveplot,savedir,customtitle,customfigname);
