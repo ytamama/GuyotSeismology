@@ -10,7 +10,7 @@ lncsv=fullfile(datadir,'nlnm.csv');
 hncsv=fullfile(datadir,'nhnm.csv');
 saveplot=1;
 % Insert your own directory to save your plots!
-savedir=fullfle(pwd,'figures');
+savedir=fullfile(pwd,'figures');
 % Label the frequencies of 1.5 Hz and 5 Hz
 freqband=[1.5 5];
 % Plot against frequency
