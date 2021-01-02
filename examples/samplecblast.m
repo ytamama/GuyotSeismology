@@ -29,7 +29,7 @@ makeplot=1;
 saveplot=1;
 % Plot the campus blast!
 [corrfiles,figurehdl]=mstime2sac(measval,starttime,finaltime,...
-  frequency,rmoutlier,savedir,makeplot,saveplot,savedir);
+  frequency,rmoutlier,datadir,makeplot,saveplot,savedir);
 
 
 % Once you plot the data, use the command line interface to narrow down
