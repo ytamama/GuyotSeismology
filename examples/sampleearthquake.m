@@ -58,10 +58,10 @@ spinfo={5;[1 2 3 4 5];{'r';'g';'b';[0 .75 .55];[0 .6 .75]}};
 stainfo={[];[];[];[]};
 frequency=[0.005 0.01 1 2];
 
-% Generate the SAC files for all 5 components
+% Generate the SAC files for all 5 components and plot all 5 components!
 coord=2;
 corrpieces=mcevt2sac(rowdata,measval,frequency,timeinfo,...
-  savedir,makeplot,saveplot,plotdir,coord,addphases);
+  savedir,makeplot,0,plotdir,coord,addphases);
 % Plot all 5 SAC files!
 soleplot=1;
 corder={'Z';'Y';'X';'T';'R'};
@@ -70,6 +70,6 @@ saveplot=1;
 figure();
 [seisplot,axeshdl,figname]=...
   plotsacdata(soleplot,corrpieces,measval,{frequency},corder,spinfo,...
-  stainfo,100,0,saveplot,savedir,evtinfo,timeinfo);
+  stainfo,[],0,saveplot,plotdir,evtinfo,timeinfo);
 
 
