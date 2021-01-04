@@ -1097,11 +1097,7 @@ end
 if makeplots==1 && length(csvfiles)>1
   startstrs=csvlbls{1};
   startstrs=strsplit(startstrs,'_');
-  if timeinfo==2
-    startstr=sprintf('%s %s',startstrs{2},startstrs{1});
-  else
-    startstr=startstrs{1};
-  end
+  startstr=sprintf('%s %s',startstrs{2},startstrs{1});
   figurehdls=seiscsvplot(seiscsvprc,timeinfo,startstr,avgmode,...
     measval,frequency,tzlabel,saveplot,savedir);
 end
