@@ -10,7 +10,7 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,...
 %           1 : Velocity
 %           2 : Acceleration
 % xval : Frequency (1/s) or period (s) on the x axis?
-%        0 : Frequency (default)
+%        0 : Frequency (default; with period on the top x axis)
 %        1 : Period 
 % lncsv : CSV file containing the values for the piecewise functions that
 %         construct the NLNM. See nlnm.csv 
@@ -45,7 +45,7 @@ function [figurehdl,figname]=pnm(measval,xval,lncsv,hncsv,...
 % For more on decibels, see Bormann (2015), Seismic Noise
 % DOI : 10.1007/978-3-642-36197-5_289-1
 %
-% Last Modified by Yuri Tamama, 12/27/2020
+% Last Modified by Yuri Tamama, 01/02/2021
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set default values
